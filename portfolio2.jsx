@@ -1,126 +1,168 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { CASE_STUDIES } from "./src/data/caseStudiesData.js";
 
 /* ─── DATA ────────────────────────────────────────────────── */
 
 const NAV_LINKS = ["Work", "Process", "Skills", "About", "Contact"];
 
 const STATS = [
-  { value: 6.8, suffix: "+", unit: "Years", label: "of shipping products" },
-  { value: 5000, suffix: "+", unit: "Users", label: "impacted by my work" },
-  { value: 30, suffix: "%", unit: "Faster", label: "delivery cycles" },
-  { value: 20, suffix: "%", unit: "Gains", label: "in team efficiency" },
-];
-
-const CASE_STUDIES = [
-  {
-    id: 1, tag: "AI · Fintech · Enterprise", title: "AI Fraud Detection Dashboard",
-    tagline: "Real-time threat intelligence that reduced analyst review time by 40%.",
-    color: "#6366f1", accent: "#818cf8", glow: "rgba(99,102,241,0.18)",
-    metric: "40% ↓ False Positives", metricSub: "review time",
-    users: "800+ analysts · 3 countries",
-    icon: "◈",
-    challenge: "A leading fintech needed to surface complex ML fraud signals to non-technical analysts — without overwhelming them — while maintaining sub-second response times on millions of daily transactions. The legacy dashboard had 14 overlapping alert states and no clear visual hierarchy.",
-    constraints: "Sub-100ms render performance · Non-technical analyst audience · Regulatory compliance overlays · 6-week delivery timeline",
-    role: "Lead Product Designer — end-to-end ownership from discovery workshops through QA sign-off and analyst onboarding.",
-    process: ["Stakeholder interviews with 12 fraud analysts","Competitive audit of 6 enterprise dashboards","Information architecture: 14 → 4 alert states","3 rounds of moderated usability testing","Design system component library (62 components)","Developer handoff via Zeroheight"],
-    metrics: ["40% reduction in false-positive review time","28% improvement in threat detection accuracy","NPS jumped from 32 → 71 post-launch","Analyst onboarding cut from 3 days to 4 hours"],
-    outcome: "Shipped Q2 2024. Rolled out to 800+ analysts across 3 countries. Became the internal gold standard for data-heavy enterprise UX.",
-    learnings: "Dense data environments demand ruthless hierarchy. Every visual element must earn its place. When in doubt, remove — don't add."
-  },
-  {
-    id: 2, tag: "Logistics · B2B · SaaS", title: "Shipease Logistics Platform",
-    tagline: "Full platform redesign that drove $4M ARR growth in Year 1.",
-    color: "#10b981", accent: "#34d399", glow: "rgba(16,185,129,0.15)",
-    metric: "30% Faster Ops", metricSub: "dispatch cycle",
-    users: "2,400+ logistics operators",
-    icon: "⬡",
-    challenge: "Shipease's legacy platform had 60% task abandonment on their core dispatch flow. Operations teams were losing 2+ hours daily to workarounds. NPS was -12 and churn was accelerating.",
-    constraints: "Live production migration (zero downtime) · 6-month timeline · Legacy API constraints · 3 regional language requirements",
-    role: "Senior UX Designer — research strategy, information architecture, interaction design, and full design system ownership.",
-    process: ["Contextual inquiry with 8 dispatchers","Journey mapping of 6 core workflows","Card sorting for navigation redesign","5 prototype iterations with weekly testing","120-component design library","Live migration plan with engineering"],
-    metrics: ["30% reduction in dispatch time","Task completion: 41% → 89%","Support tickets down 52% in 30 days","3.2× increase in daily active users"],
-    outcome: "Platform relaunched in 6 months. Became Shipease's primary growth lever — contributing to a $4M ARR increase in Year 1 and securing Series B funding.",
-    learnings: "Operators work under pressure. Speed and predictability matter more than delight. Design for the hard moments first."
-  },
-  {
-    id: 3, tag: "Marketplace · Consumer · Growth", title: "Marketplace Booking Experience",
-    tagline: "Mobile-first redesign that unlocked $2.1M incremental revenue.",
-    color: "#f59e0b", accent: "#fbbf24", glow: "rgba(245,158,11,0.15)",
-    metric: "22% ↑ Conversion", metricSub: "booking rate",
-    users: "50K+ active professionals",
-    icon: "◎",
-    challenge: "A marketplace with 50K+ professionals had a 3-step booking funnel with 71% drop-off. The mobile experience was afterthought-built — 4.2s load times, unclear CTAs, and a confirmation flow requiring 11 taps.",
-    constraints: "No redesign budget for backend · Must reuse existing component library · 8-week window before peak season",
-    role: "Product Designer — mobile-first funnel redesign with direct collaboration with growth and engineering teams.",
-    process: ["Funnel analytics deep-dive (400K sessions)","Session recording analysis (400+ recordings)","A/B testing framework setup","Progressive disclosure redesign in Figma","Performance audit with engineering"],
-    metrics: ["22% increase in booking conversion","Mobile load: 4.2s → 1.8s","Cart abandonment down 34%","Revenue per session up 18%"],
-    outcome: "New booking flow drove $2.1M incremental revenue in its first quarter. The redesign became a Harvard Business School product case study.",
-    learnings: "Conversion is a UX problem. Every extra tap costs money. Ruthless simplification and performance are the same discipline."
-  },
-  {
-    id: 4, tag: "Enterprise · ERP · Manufacturing", title: "Enterprise ERP Workflow System",
-    tagline: "Legacy ERP modernisation that cut onboarding from 6 months to 3 weeks.",
-    color: "#8b5cf6", accent: "#a78bfa", glow: "rgba(139,92,246,0.15)",
-    metric: "35% ↓ Error Rate", metricSub: "data entry errors",
-    users: "2,000+ factory floor workers",
-    icon: "⬟",
-    challenge: "A manufacturing ERP used by 2,000+ employees had a 1990s interface causing 200+ daily data-entry errors and a 6-month onboarding curve. Critical production decisions were being made on faulty data.",
-    constraints: "No frontend rewrite — UI only · Multi-language (EN/DE/JA) · Strict regulatory audit trails · 18-month programme timeline",
-    role: "Lead Designer — system architecture, interaction patterns, role-based UX design, and multi-language design system.",
-    process: ["6-week ethnographic research on factory floor","Error pattern analysis with QA team","Progressive disclosure IA","Role-based permission UX design","Multi-language design system (EN/DE/JA)","Phased rollout across 4 plants"],
-    metrics: ["35% reduction in data-entry errors","Onboarding: 6 months → 3 weeks","Employee satisfaction: 2.8 → 4.4 / 5","IT support tickets down 61%"],
-    outcome: "Deployed across 4 manufacturing plants in 3 countries. Won internal innovation award. Client renewed a 5-year contract citing UX improvement as a key driver.",
-    learnings: "Complex systems need simplicity at the surface. Role-based design isn't just a feature — it's the whole strategy."
-  },
+  { value: 6.8, suffix: "+", unit: "Years", label: "Building Digital Products" },
+  { value: 30, suffix: "+", unit: "Projects", label: "Launched & Delivered" },
+  { value: "", suffix: "", unit: "Global  Markets", label: "UK · US · India · Australia" },
+  { value: "6", suffix: "+", unit: "Industries", label: "EdTech · Logistics · Cybersecurity · eCommerce · Enterprise SaaS · Travel / Hospitality" },
 ];
 
 const PROCESS_STEPS = [
   { n: "01", title: "Discover", sub: "Interviews · Research · Competitive audit", icon: "◐" },
-  { n: "02", title: "Define",   sub: "Problem framing · Success metrics · Principles", icon: "◑" },
-  { n: "03", title: "Ideate",   sub: "Sketches · IA · Flow mapping · Concepts", icon: "◒" },
-  { n: "04", title: "Prototype",sub: "High-fidelity Figma · Interactive flows", icon: "◓" },
-  { n: "05", title: "Test",     sub: "Usability testing · A/B · Heuristics", icon: "◔" },
-  { n: "06", title: "Ship",     sub: "Dev handoff · QA review · Launch", icon: "◕" },
+  { n: "02", title: "Define", sub: "Problem framing · Success metrics · Principles", icon: "◑" },
+  { n: "03", title: "Ideate", sub: "Sketches · IA · Flow mapping · Concepts", icon: "◒" },
+  { n: "04", title: "Prototype", sub: "High-fidelity Figma · Interactive flows", icon: "◓" },
+  { n: "05", title: "Test", sub: "Usability testing · A/B · Heuristics", icon: "◔" },
+  { n: "06", title: "Ship", sub: "Dev handoff · QA review · Launch", icon: "◕" },
   { n: "07", title: "Optimise", sub: "Analytics · Iteration · Continuous improvement", icon: "●" },
 ];
 
-const SKILLS_PRIMARY = ["Figma","FigJam","Adobe XD","Sketch","Design Systems","UX Research"];
-const SKILLS_SEC     = ["Claude AI","ChatGPT","Jira / Agile","React + HTML/CSS","A/B Testing","Prototyping","User Interviews","Design Tokens","Accessibility"];
-const SKILL_BARS = [
-  { name: "Product Thinking",        level: 97 },
-  { name: "Figma / Design Tools",    level: 98 },
-  { name: "UX Research",             level: 91 },
-  { name: "Design Systems",          level: 95 },
-  { name: "Prototyping",             level: 96 },
-  { name: "Front-end Collaboration", level: 80 },
+const SKILLS_CATEGORIES = [
+  {
+    label: "Product Design",
+    line:
+      "End-to-End Product Design · Product Discovery · UX Strategy · MVP Design · Feature Prioritization · Conversion Optimization · Roadmapping · KPI-Focused Design · Stakeholder Management",
+  },
+  {
+    label: "UX Design",
+    line:
+      "Interaction Design · User Research · Personas · Journey Mapping · User Flows · Information Architecture · Wireframing · Prototyping · Usability Testing · A/B Testing",
+  },
+  {
+    label: "UI Design",
+    line:
+      "Design Systems · Component Libraries · Design Tokens · Dashboard UX · Data Visualization · Responsive Design · Accessibility (WCAG 2.1) · Motion Design · Visual Design",
+  },
+  { label: "Tools", line: "Figma (Advanced) · Adobe XD · Sketch · FigJam · Claude AI · ChatGPT · Jira · Git" },
+  { label: "Technical", line: "HTML / CSS · React (Working Knowledge) · Tailwind · Vercel" },
+  {
+    label: "Methods",
+    line:
+      "Agile (Scrum) · Design Thinking · Design Sprints · Human-Centered Design · Async Remote Collaboration · Cross-functional Collaboration",
+  },
 ];
+
+const LINKEDIN_RECOMMENDATIONS_URL =
+  "https://www.linkedin.com/in/himanshugrover-hg/details/recommendations/?detailScreenTabIndex=0";
 
 const TESTIMONIALS = [
   {
-    name: "Priya Kapoor", role: "Senior Product Manager", co: "Razorpay",
-    initials: "PK", color: "#6366f1", accent: "#818cf8",
-    quote: "Himanshu doesn't just design screens — he diagnoses product problems. His ability to translate ambiguous research into a clean, opinionated UI is genuinely rare. He shipped our most ambitious redesign with zero quality compromise and beat the deadline by two weeks.",
-    highlight: "beat the deadline by two weeks"
+    name: "Shilpa",
+    initials: "S",
+    roleLine: "Senior Project Manager · Publishing & Digital Transformation",
+    relation: "Managed Himanshu directly",
+    quote:
+      "Himanshu is an exceptional Senior UI/UX Designer who brings together user-centered thinking, strong design execution, and strategic clarity. He demonstrates strong ownership and leadership — mentoring junior designers, maintaining design consistency through systems and guidelines, and driving best result-driven practices across teams.",
+    color: "#6366f1",
   },
   {
-    name: "Alex Chen", role: "Engineering Lead", co: "Shipease",
-    initials: "AC", color: "#10b981", accent: "#34d399",
-    quote: "Working with Himanshu changed how our engineering team thinks about UX. His handoffs are pixel-perfect, his component thinking is engineering-native, and he will fight for the right user experience in every sprint review. Best designer I've ever shipped with.",
-    highlight: "Best designer I've ever shipped with"
+    name: "Himanshu Batra",
+    initials: "HB",
+    roleLine: "Backend Developer · SaaS & Web Applications · Shipease",
+    relation: "Worked on the same team",
+    quote:
+      "Himanshu has a strong ability to turn complex requirements into clean, intuitive, and scalable product experiences. His mix of design expertise and frontend understanding makes collaboration seamless and ensures high-quality execution. He consistently brings user-focused thinking, accessibility awareness, and a proactive attitude to every project.",
+    color: "#10b981",
   },
   {
-    name: "Meera Sharma", role: "Co-Founder & CEO", co: "Marketplace Startup",
-    initials: "MS", color: "#f59e0b", accent: "#fbbf24",
-    quote: "We were haemorrhaging conversion rate. Himanshu came in, understood the business before touching Figma, and delivered a booking experience that paid for itself in six weeks. His taste level and strategic instinct are exceptional.",
-    highlight: "paid for itself in six weeks"
+    name: "Gourav Kumar",
+    initials: "GK",
+    roleLine: "Data Science & Analytics · Associate Manager",
+    relation: "Managed Himanshu directly · 2+ years",
+    quote:
+      "He consistently delivered accurate insights, handled stakeholders well, and showed strong ownership of complex projects.",
+    color: "#f59e0b",
   },
 ];
 
-const GALLERY = [
-  { label: "Dashboard UI",    sub: "Data-heavy enterprise · AI analytics",    icon: "▦", c: "#6366f1" },
-  { label: "Mobile Apps",     sub: "iOS · Android · Consumer products",        icon: "▢", c: "#10b981" },
-  { label: "Design Systems",  sub: "Tokens · Components · Documentation",      icon: "▣", c: "#8b5cf6" },
-  { label: "Landing Pages",   sub: "SaaS · Startup · Growth-focused",          icon: "▤", c: "#f59e0b" },
+const SELECTED_WORK = [
+  {
+    title: "Creelo",
+    tagline: "Live Website · eCommerce · Premium Home Essentials",
+    image: "/selected-work/creelo/creelo-in.png",
+    description:
+      "End-to-end UX across storefront, vendor panel, admin panel, and partner onboarding flows. Live product serving premium brands including Kohler and Brizo.",
+    cta: "Visit Live Site",
+    href: "https://creelo.in",
+    hrefLabel: "creelo.in",
+    color: "#6366f1",
+  },
+  {
+    title: "Shipease Aggregator Panel",
+    tagline: "Live SaaS · Logistics · B2B Aggregator",
+    image: "/selected-work/shipease/Shipease.png",
+    description:
+      "Full aggregator dashboard enabling sellers to manage shipments across multiple logistics providers — onboarding, order management, rate comparison, and real-time tracking. Fully accessible, no login required.",
+    cta: "View Live Product",
+    href: "https://logisticssaas.vercel.app",
+    hrefLabel: "logisticssaas.vercel.app",
+    color: "#10b981",
+  },
+  {
+    title: "Petnexion",
+    tagline: "Mobile App · Social Network · iOS/Android",
+    images: ["/selected-work/petxion/Login.png", "/selected-work/petxion/Home.png", "/selected-work/petxion/edit-profile.png"],
+    modalImages: ["/selected-work/petxion/Mobile-Mockup-Design2.png"],
+    description:
+      "End-to-end mobile UI for a pet social networking app — onboarding, home feed, profile, connections, events, and pet management. Designed sole end-to-end at Chetu Inc.",
+    status: "No longer live · Screenshots available",
+    color: "#8b5cf6",
+  },
+  {
+    title: "EcoLiving",
+    tagline: "Design Exercise · eCommerce · Sustainable Living",
+    image: "/selected-work/eco-living/Hero.png",
+    modalImages: ["/selected-work/eco-living/Eco.png"],
+    description:
+      "Interview assignment exploring a sustainable home essentials storefront — hero section, featured collections bento grid, trust signals, testimonials, and newsletter flows.",
+    status: "Concept · Not a real client",
+    color: "#f59e0b",
+  },
+];
+
+const DESIGN_PRINCIPLES = [
+  {
+    n: "01",
+    title: "Constraints are a design brief.",
+    body:
+      "At Magic Edtech, there were no user interviews, no direct client access, and no feedback loops — just documentation and strict WCAG accessibility standards to follow. I learned that working within tight constraints isn't a limitation. It forces clarity, precision, and a deeper respect for the end user you never get to meet.",
+  },
+  {
+    n: "02",
+    title: "Understand the product before designing the screen.",
+    body:
+      "At Apate AI, the hardest part wasn't the UI — it was understanding what the product actually did well enough to define the right KPIs, the right hierarchy, and the right four operational pillars. You cannot design a good dashboard for a product you don't deeply understand. I always spend more time in discovery than most designers think is necessary.",
+  },
+  {
+    n: "03",
+    title: "When there's no data, research is your foundation.",
+    body:
+      "At Chetu, leadership couldn't provide user data or research. So I ran my own competitive analysis, studied industry patterns, and made design decisions grounded in evidence I gathered independently. A good designer doesn't wait for perfect information — they build the best picture they can with what's available.",
+  },
+  {
+    n: "04",
+    title: "Differentiation lives in the details others skip.",
+    body:
+      "At Shipease, the aggregator market was highly competitive. The way to stand out wasn't to copy what others were doing — it was to identify the features and interactions competitors weren't presenting well and do them better. The most impactful design decisions weren't the obvious ones.",
+  },
+  {
+    n: "05",
+    title: "Guided workflows beat open-ended dashboards.",
+    body:
+      "In enterprise and operations products, users under pressure don't want flexibility — they want clarity. Especially in data-heavy platforms like Apate AI, a well-structured guided path consistently outperforms a powerful but unguided interface. I design for the hard moments first, not the happy path.",
+  },
+  {
+    n: "06",
+    title: "Accessibility is not a checklist — it's a design standard.",
+    body:
+      "Spending 3.5 years designing to WCAG 2.1 standards for global education platforms taught me that accessibility constraints almost always produce better design. Better contrast, clearer hierarchy, more readable typography, more logical structure. Designing for everyone raises the bar for everyone.",
+  },
 ];
 
 /* ─── HOOKS ───────────────────────────────────────────────── */
@@ -135,46 +177,84 @@ function useInView(ref, threshold = 0.12) {
 }
 
 /* ─── PRIMITIVES ──────────────────────────────────────────── */
-function Reveal({ children, delay = 0, y = 28 }) {
+function Reveal({ children, delay = 0, y = 28, stretch = false }) {
   const ref = useRef(); const v = useInView(ref);
   return (
-    <div ref={ref} style={{ opacity: v ? 1 : 0, transform: v ? "none" : `translateY(${y}px)`, transition: `opacity 0.75s cubic-bezier(.22,1,.36,1) ${delay}s, transform 0.75s cubic-bezier(.22,1,.36,1) ${delay}s` }}>
+    <div
+      ref={ref}
+      style={{
+        opacity: v ? 1 : 0,
+        transform: v ? "none" : `translateY(${y}px)`,
+        transition: `opacity 0.75s cubic-bezier(.22,1,.36,1) ${delay}s, transform 0.75s cubic-bezier(.22,1,.36,1) ${delay}s`,
+        ...(stretch
+          ? { display: "flex", flexDirection: "column", alignSelf: "stretch", minHeight: 0, minWidth: 0, width: "100%", maxWidth: "100%", height: "100%", boxSizing: "border-box" }
+          : {}),
+      }}
+    >
       {children}
     </div>
   );
 }
 
-function Counter({ target, suffix, duration = 1600 }) {
-  const [val, setVal] = useState(0); const ref = useRef(); const v = useInView(ref, 0.4);
+function Counter({ target, suffix = "", duration = 1600 }) {
+  const isText = typeof target === "string";
+  const numericTarget = typeof target === "number" ? target : 0;
+  const [val, setVal] = useState(0);
+  const ref = useRef();
+  const v = useInView(ref, 0.4);
+  const useDecimals = !Number.isInteger(numericTarget);
+
   useEffect(() => {
-    if (!v) return;
+    if (!v || isText) return;
     let s = 0;
-    const tick = () => { s += 16; const p = Math.min(s / duration, 1); const ease = 1 - Math.pow(1 - p, 3); setVal(Math.round(ease * target * 10) / 10); if (p < 1) requestAnimationFrame(tick); };
+    const tick = () => {
+      s += 16;
+      const p = Math.min(s / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      if (p >= 1) {
+        setVal(numericTarget);
+        return;
+      }
+      const next = useDecimals
+        ? Math.round(ease * numericTarget * 10) / 10
+        : Math.round(ease * numericTarget);
+      setVal(next);
+      requestAnimationFrame(tick);
+    };
     requestAnimationFrame(tick);
-  }, [v]);
-  return <span ref={ref}>{val % 1 === 0 ? val.toLocaleString() : val}{suffix}</span>;
+  }, [v, numericTarget, useDecimals, duration, isText]);
+
+  if (isText) {
+    return (
+      <span ref={ref}>
+        {target}
+        {suffix}
+      </span>
+    );
+  }
+
+  const display = useDecimals
+    ? (Number.isInteger(val) ? val.toLocaleString() : val.toFixed(1))
+    : val.toLocaleString();
+  return <span ref={ref}>{display}{suffix}</span>;
 }
 
 function Tag({ children, color, bg }) {
-  return <span style={{ display: "inline-flex", alignItems: "center", fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: color || "#818cf8", background: bg || "rgba(99,102,241,0.1)", padding: "3px 10px", borderRadius: "100px", border: `1px solid ${color ? color + "33" : "rgba(99,102,241,0.25)"}` }}>{children}</span>;
+  return <span style={{ display: "inline-flex", alignItems: "center", fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: color || "#818cf8", background: bg || "rgba(99,102,241,0.1)", padding: "4px 12px", borderRadius: "100px", border: `1px solid ${color ? color + "40" : "rgba(99,102,241,0.28)"}`, boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset" }}>{children}</span>;
 }
 
-function Pill({ children, dark }) {
-  return <span style={{ display: "inline-flex", fontSize: "13px", fontWeight: 500, color: dark ? "#94a3b8" : "#475569", background: dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, padding: "6px 14px", borderRadius: "100px" }}>{children}</span>;
-}
-
-function Btn({ children, onClick, href, variant = "ghost", dark }) {
+function Btn({ children, onClick, href, target, rel, variant = "ghost", dark }) {
   const variants = {
     primary: { background: "linear-gradient(135deg,#6366f1 0%,#818cf8 100%)", border: "none", color: "#fff", boxShadow: "0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15)", padding: "14px 28px" },
-    ghost:   { background: "transparent", border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`, color: dark ? "#e2e8f0" : "#374151", boxShadow: "none", padding: "13px 24px" },
+    ghost: { background: "transparent", border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`, color: dark ? "#e2e8f0" : "#374151", boxShadow: "none", padding: "13px 24px" },
   };
-  const base = { display: "inline-flex", alignItems: "center", gap: "7px", borderRadius: "100px", fontSize: "15px", fontWeight: 600, cursor: "pointer", transition: "all 0.22s cubic-bezier(.22,1,.36,1)", textDecoration: "none", fontFamily: "inherit", letterSpacing: "-0.01em" };
+  const base = { display: "inline-flex", alignItems: "center", gap: "7px", borderRadius: "100px", fontSize: "15px", fontWeight: 600, cursor: "pointer", transition: "transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s cubic-bezier(.22,1,.36,1), filter 0.2s ease, background 0.2s, border-color 0.2s", textDecoration: "none", fontFamily: "inherit", letterSpacing: "-0.01em" };
   const s = { ...base, ...variants[variant] };
   const he = (el, on) => {
-    if (variant === "primary") { el.style.transform = on ? "translateY(-2px) scale(1.02)" : "none"; el.style.boxShadow = on ? "0 12px 40px rgba(99,102,241,0.55), inset 0 1px 0 rgba(255,255,255,0.2)" : "0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15)"; }
-    else { el.style.transform = on ? "translateY(-1px)" : "none"; el.style.background = on ? (dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)") : "transparent"; }
+    if (variant === "primary") { el.style.transform = on ? "translateY(-2px) scale(1.02)" : "none"; el.style.boxShadow = on ? "0 16px 48px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset" : "0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15)"; el.style.filter = on ? "brightness(1.06) saturate(1.05)" : "none"; }
+    else { el.style.transform = on ? "translateY(-1px)" : "none"; el.style.background = on ? (dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent"; el.style.borderColor = on ? (dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.16)") : (dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"); }
   };
-  if (href) return <a href={href} style={s} onMouseEnter={e => he(e.currentTarget, true)} onMouseLeave={e => he(e.currentTarget, false)}>{children}</a>;
+  if (href) return <a href={href} target={target} rel={rel ?? (target === "_blank" ? "noopener noreferrer" : undefined)} style={s} onMouseEnter={e => he(e.currentTarget, true)} onMouseLeave={e => he(e.currentTarget, false)}>{children}</a>;
   return <button style={s} onClick={onClick} onMouseEnter={e => he(e.currentTarget, true)} onMouseLeave={e => he(e.currentTarget, false)}>{children}</button>;
 }
 
@@ -184,6 +264,327 @@ function Eyebrow({ label, center }) {
       <span style={{ display: "block", width: "24px", height: "2px", background: "linear-gradient(90deg,#6366f1,#a78bfa)", borderRadius: "2px", flexShrink: 0 }} />
       <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", color: "#6366f1", textTransform: "uppercase" }}>{label}</span>
     </div>
+  );
+}
+
+function TestimonialCard({ t, delay, dark, T }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <Reveal delay={delay}>
+      <div
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          background: T.surface,
+          border: `1px solid ${hov ? t.color + "4d" : T.border}`,
+          borderRadius: "24px",
+          padding: "2.25rem 2.15rem 1.75rem",
+          transition: "transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s, border-color 0.3s",
+          transform: hov ? "translateY(-6px)" : "none",
+          boxShadow: hov ? (dark ? "0 28px 76px rgba(0,0,0,0.48),0 0 0 1px " + t.color + "15" : "0 24px 70px rgba(0,0,0,0.1)") : "none",
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+        }}
+      >
+        <div style={{ fontSize: "52px", lineHeight: 0.75, background: `linear-gradient(160deg,${t.color}aa,${t.color}22)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "Georgia,serif", marginBottom: "0.5rem", fontWeight: 700, userSelect: "none" }}>"</div>
+        <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.86, margin: "0 0 1.5rem", fontWeight: 400, letterSpacing: "0.01em", flex: 1 }}>{t.quote}</p>
+        <div style={{ paddingTop: "1.25rem", borderTop: `1px solid ${T.border}` }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+            <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: t.color + "1a", border: `2px solid ${hov ? t.color + "55" : t.color + "33"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 800, color: t.color, flexShrink: 0, transition: "border-color 0.3s" }}>{t.initials}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontWeight: 700, fontSize: "15px", color: T.text, margin: "0 0 3px", letterSpacing: "-0.015em" }}>{t.name}</p>
+              <p style={{ fontSize: "13px", color: T.textB, margin: "0 0 4px", lineHeight: 1.5 }}>{t.roleLine}</p>
+              <p style={{ fontSize: "12px", color: T.body, margin: 0, lineHeight: 1.5 }}>{t.relation}</p>
+            </div>
+          </div>
+          <a
+            href={LINKEDIN_RECOMMENDATIONS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-block",
+              marginTop: "1.1rem",
+              fontSize: "13px",
+              fontWeight: 600,
+              color: t.color,
+              textDecoration: "none",
+              borderBottom: `1px solid ${hov ? t.color + "55" : "transparent"}`,
+              paddingBottom: "1px",
+              transition: "border-color 0.2s",
+            }}
+          >
+            Verify on LinkedIn →
+          </a>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+const SW_IMG_H = 200;
+
+function SelectedWorkImageBlock({ item, T }) {
+  if (item.images?.length) {
+    return (
+      <div
+        style={{
+          margin: "0 0 1.1rem",
+          borderRadius: "14px",
+          overflow: "hidden",
+          border: `1px solid ${T.border}`,
+          background: "rgba(0,0,0,0.2)",
+          flexShrink: 0,
+          height: SW_IMG_H,
+          width: "100%",
+          minWidth: 0,
+          maxWidth: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${item.images.length}, minmax(0, 1fr))`,
+            gap: "2px",
+            alignItems: "stretch",
+            height: "100%",
+            minWidth: 0,
+            width: "100%",
+          }}
+        >
+          {item.images.map((src, i) => (
+            <img
+              key={src}
+              src={src}
+              alt={`${item.title} — screen ${i + 1}`}
+              loading="lazy"
+              style={{ width: "100%", height: "100%", minHeight: 0, minWidth: 0, objectFit: "cover", objectPosition: "top center", display: "block" }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (item.image) {
+    return (
+      <div
+        style={{
+          margin: "0 0 1.1rem",
+          borderRadius: "14px",
+          overflow: "hidden",
+          border: `1px solid ${T.border}`,
+          background: "rgba(0,0,0,0.15)",
+          flexShrink: 0,
+          height: SW_IMG_H,
+          width: "100%",
+          minWidth: 0,
+          maxWidth: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <img
+          src={item.image}
+          alt={`${item.title} — product preview`}
+          loading="lazy"
+          style={{ width: "100%", height: "100%", minHeight: 0, minWidth: 0, objectFit: "cover", objectPosition: "top center", display: "block" }}
+        />
+      </div>
+    );
+  }
+  return null;
+}
+
+function SelectedWorkModal({ item, onClose, T, dark }) {
+  if (!item?.modalImages?.length) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.title}
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 10050,
+        background: "rgba(0,0,0,0.82)",
+        display: "flex",
+        flexDirection: "column",
+        padding: "1.25rem",
+        boxSizing: "border-box",
+        minHeight: 0,
+        height: "100vh",
+        maxHeight: "100vh",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          flex: "1 1 0",
+          minHeight: 0,
+          minWidth: 0,
+          width: "100%",
+          overflowX: "hidden",
+          overflowY: "auto",
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            maxWidth: "min(1100px, 96vw)",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+              padding: "0 0 6px 0",
+              marginBottom: "4px",
+              background: "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)",
+            }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              style={{
+                width: "42px",
+                height: "42px",
+                borderRadius: "12px",
+                border: `1px solid ${T.border}`,
+                background: T.surface,
+                color: T.text,
+                fontSize: "24px",
+                lineHeight: 1,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: dark ? "0 8px 24px rgba(0,0,0,0.5)" : "0 4px 20px rgba(0,0,0,0.1)",
+              }}
+            >
+              ×
+            </button>
+          </div>
+          {item.modalImages.map((src, i) => (
+            <img
+              key={src}
+              src={src}
+              alt={`${item.title} — preview ${i + 1}`}
+              style={{
+                display: "block",
+                width: "100%",
+                maxWidth: "100%",
+                minWidth: 0,
+                height: "auto",
+                borderRadius: "14px",
+                border: `1px solid ${T.border}`,
+                marginTop: i === 0 ? 0 : "14px",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SelectedWorkCard({ item, delay, dark, T, onModalOpen }) {
+  const [hov, setHov] = useState(false);
+  const hasModal = item.modalImages?.length > 0 && typeof onModalOpen === "function";
+  return (
+    <Reveal delay={delay} stretch>
+      <article
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        onClick={() => {
+          if (hasModal) onModalOpen(item);
+        }}
+        onKeyDown={e => {
+          if (!hasModal) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onModalOpen(item);
+          }
+        }}
+        role={hasModal ? "button" : undefined}
+        tabIndex={hasModal ? 0 : undefined}
+        aria-label={hasModal ? `Open ${item.title} preview` : undefined}
+        style={{
+          background: hov ? T.surface : "rgba(255,255,255,0.02)",
+          border: `1px solid ${hov ? item.color + "4d" : T.border}`,
+          borderRadius: "20px",
+          padding: "1.85rem 1.6rem 1.75rem",
+          transition: "all 0.28s cubic-bezier(.22,1,.36,1)",
+          transform: hov ? "translateY(-4px)" : "none",
+          boxShadow: hov ? (dark ? "0 20px 56px rgba(0,0,0,0.35)" : "0 16px 48px rgba(0,0,0,0.08)") : "none",
+          minHeight: 0,
+          minWidth: 0,
+          height: "100%",
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          cursor: hasModal ? "pointer" : "default",
+          outline: "none",
+          overflow: "hidden",
+        }}
+      >
+        <SelectedWorkImageBlock item={item} T={T} />
+        <h3 style={{ fontWeight: 800, fontSize: "1.3rem", color: T.text, margin: "0 0 0.4rem", letterSpacing: "-0.03em", lineHeight: 1.2 }}>{item.title}</h3>
+        <p
+          style={{
+            fontSize: "12px",
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            color: item.color,
+            margin: "0 0 1rem",
+            lineHeight: 1.5,
+          }}
+        >
+          {item.tagline}
+        </p>
+        <p style={{ fontSize: "15px", color: T.body, margin: "0 0 1.35rem", lineHeight: 1.75, flex: 1, minHeight: 0, overflow: "auto" }}>{item.description}</p>
+        {item.href ? (
+          <div>
+            <a
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "14px",
+                fontWeight: 700,
+                color: item.color,
+                textDecoration: "none",
+                borderBottom: `1px solid ${item.color}40`,
+                paddingBottom: "2px",
+                marginBottom: "0.25rem",
+              }}
+            >
+              <span style={{ fontSize: "15px" }}>→</span> {item.cta}
+            </a>
+            <p style={{ fontSize: "12px", color: T.body, margin: "0.45rem 0 0" }}>({item.hrefLabel})</p>
+          </div>
+        ) : (
+          <p style={{ fontSize: "13px", color: T.body, margin: 0, fontStyle: "italic", lineHeight: 1.55 }}>{item.status}</p>
+        )}
+      </article>
+    </Reveal>
   );
 }
 
@@ -198,88 +599,19 @@ function ScrollBar() {
   return <div style={{ position: "fixed", top: 0, left: 0, height: "2px", width: p + "%", background: "linear-gradient(90deg,#6366f1,#a78bfa,#60a5fa)", zIndex: 9999, transition: "width 0.08s linear" }} />;
 }
 
-/* ─── MODAL ───────────────────────────────────────────────── */
-function MBlock({ label, color, children }) {
-  return (
-    <div style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "1.35rem 1.5rem" }}>
-      <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color, textTransform: "uppercase", margin: "0 0 0.8rem" }}>{label}</p>
-      {children}
-    </div>
-  );
-}
-
-function Modal({ cs, onClose }) {
-  useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
-  return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(4,6,12,0.9)", backdropFilter: "blur(14px)", zIndex: 1000, overflowY: "auto", padding: "2rem 1rem", display: "flex", justifyContent: "center" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#0c0f1a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "26px", width: "100%", maxWidth: "840px", overflow: "hidden", height: "fit-content", boxShadow: "0 48px 140px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04)" }}>
-
-        {/* Header stripe */}
-        <div style={{ background: `linear-gradient(135deg,${cs.color}25 0%,${cs.color}08 60%,transparent 100%)`, borderBottom: `1px solid ${cs.color}22`, padding: "2.75rem 2.75rem 2.25rem", position: "relative" }}>
-          <button onClick={onClose} style={{ position: "absolute", top: "1.5rem", right: "1.5rem", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", color: "#94a3b8", width: "38px", height: "38px", borderRadius: "50%", cursor: "pointer", fontSize: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-          <Tag color={cs.accent} bg={cs.color + "18"}>{cs.tag}</Tag>
-          <h2 style={{ fontSize: "clamp(1.8rem,4vw,2.5rem)", fontWeight: 900, color: "#f1f5f9", margin: "0.9rem 0 0.6rem", lineHeight: 1.08, letterSpacing: "-0.04em" }}>{cs.title}</h2>
-          <p style={{ color: "#94a3b8", fontSize: "17px", lineHeight: 1.7, maxWidth: "600px", margin: "0 0 1.75rem", fontWeight: 400 }}>{cs.tagline}</p>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            {[[cs.metric, "Key Metric", cs.color], [cs.users, "Users Served", null]].map(([val, lbl, c]) => (
-              <div key={lbl} style={{ background: c ? c + "18" : "rgba(255,255,255,0.04)", border: `1px solid ${c ? c + "33" : "rgba(255,255,255,0.08)"}`, borderRadius: "14px", padding: "0.9rem 1.35rem" }}>
-                <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: c ? cs.accent : "#64748b", textTransform: "uppercase", margin: "0 0 4px" }}>{lbl}</p>
-                <p style={{ fontSize: "22px", fontWeight: 900, color: "#f1f5f9", margin: 0, letterSpacing: "-0.025em" }}>{val}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ padding: "2.25rem 2.75rem 2.75rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1rem" }}>
-            <MBlock label="Challenge" color={cs.accent}><p style={{ color: "#94a3b8", fontSize: "15px", lineHeight: 1.8, margin: 0 }}>{cs.challenge}</p></MBlock>
-            <MBlock label="Constraints" color={cs.accent}>
-              {cs.constraints.split(" · ").map((c, i) => (
-                <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", marginBottom: "8px" }}>
-                  <span style={{ color: cs.accent, marginTop: "4px", fontSize: "11px", flexShrink: 0, fontWeight: 900 }}>→</span>
-                  <span style={{ color: "#94a3b8", fontSize: "14px", lineHeight: 1.65 }}>{c}</span>
-                </div>
-              ))}
-            </MBlock>
-          </div>
-          <MBlock label="My Role" color={cs.accent}><p style={{ color: "#cbd5e1", fontSize: "16px", lineHeight: 1.7, fontWeight: 500, margin: 0 }}>{cs.role}</p></MBlock>
-          <MBlock label="UX Process" color={cs.accent}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {cs.process.map((p, i) => <span key={i} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "#cbd5e1", fontSize: "13px", fontWeight: 500, padding: "6px 13px", borderRadius: "100px" }}>{p}</span>)}
-            </div>
-          </MBlock>
-          <MBlock label="Outcomes & Metrics" color={cs.accent}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: "10px" }}>
-              {cs.metrics.map((m, i) => (
-                <div key={i} style={{ background: cs.color + "10", border: `1px solid ${cs.color}25`, borderRadius: "12px", padding: "1rem 1.1rem", display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                  <span style={{ color: cs.accent, fontWeight: 900, flexShrink: 0, marginTop: "2px" }}>↑</span>
-                  <span style={{ color: "#e2e8f0", fontSize: "14px", lineHeight: 1.55, fontWeight: 500 }}>{m}</span>
-                </div>
-              ))}
-            </div>
-          </MBlock>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1rem" }}>
-            <MBlock label="Outcome" color={cs.accent}><p style={{ color: "#94a3b8", fontSize: "14px", lineHeight: 1.8, margin: 0 }}>{cs.outcome}</p></MBlock>
-            <MBlock label="Key Learning" color={cs.accent}><p style={{ color: "#94a3b8", fontSize: "14px", lineHeight: 1.8, fontStyle: "italic", margin: 0 }}>"{cs.learnings}"</p></MBlock>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── HERO CARD ───────────────────────────────────────────── */
 function HeroCard({ dark }) {
   const T = dark;
+  const [float, setFloat] = useState(false);
   return (
-    <div style={{ position: "relative", width: "300px", flexShrink: 0 }}>
-      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "360px", height: "360px", background: "radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "relative", background: T ? "rgba(13,16,28,0.92)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)", border: `1px solid ${T ? "rgba(255,255,255,0.1)" : "rgba(99,102,241,0.2)"}`, borderRadius: "28px", padding: "1.75rem 1.75rem 1.5rem", boxShadow: T ? "0 36px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)" : "0 36px 90px rgba(0,0,0,0.12)" }}>
+    <div style={{ position: "relative", width: "300px", flexShrink: 0 }} onMouseEnter={() => setFloat(true)} onMouseLeave={() => setFloat(false)}>
+      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "380px", height: "380px", background: "radial-gradient(circle,rgba(99,102,241,0.24) 0%,rgba(99,102,241,0.06) 45%,transparent 70%)", pointerEvents: "none", opacity: float ? 1 : 0.85, transition: "opacity 0.45s cubic-bezier(.22,1,.36,1)" }} />
+      <div style={{ position: "relative", background: T ? "rgba(13,16,28,0.92)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)", border: `1px solid ${T ? "rgba(255,255,255,0.1)" : "rgba(99,102,241,0.2)"}`, borderRadius: "28px", padding: "1.85rem 1.75rem 1.55rem", boxShadow: float ? (T ? "0 44px 100px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(255,255,255,0.06)" : "0 44px 100px rgba(0,0,0,0.14), 0 0 40px rgba(99,102,241,0.1)") : (T ? "0 36px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)" : "0 36px 90px rgba(0,0,0,0.12)"), transform: float ? "translateY(-6px)" : "none", transition: "transform 0.45s cubic-bezier(.22,1,.36,1), box-shadow 0.45s cubic-bezier(.22,1,.36,1)" }}>
         <div style={{ width: "68px", height: "68px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", marginBottom: "1.25rem", boxShadow: "0 8px 28px rgba(99,102,241,0.45)" }}>🎨</div>
         <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 5px" }}>Senior Product Designer</p>
         <p style={{ fontSize: "22px", fontWeight: 900, color: T ? "#f1f5f9" : "#0f172a", letterSpacing: "-0.035em", margin: "0 0 1.25rem", lineHeight: 1.15 }}>Himanshu Grover</p>
         <div style={{ height: "1px", background: T ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)", margin: "0 0 1rem" }} />
-        {[["6.8+ yrs","Product Design"],["30+ projects","Shipped to production"],["5K+ users","Impacted globally"]].map(([v, l]) => (
+        {[["6.8+ yrs", "Product Design"], ["30+ Products & Features Shipped to Production"], ["5K+ users", "Impacted globally"]].map(([v, l]) => (
           <div key={v} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${T ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
             <span style={{ fontSize: "14px", fontWeight: 700, color: T ? "#e2e8f0" : "#1e293b", letterSpacing: "-0.01em" }}>{v}</span>
             <span style={{ fontSize: "12px", color: T ? "#64748b" : "#94a3b8" }}>{l}</span>
@@ -299,22 +631,23 @@ function CaseCard({ cs, dark, surface, border, text, muted, onClick }) {
   const [hov, setHov] = useState(false);
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={onClick}
-      style={{ background: hov ? (dark ? "rgba(12,14,24,0.98)" : "#fff") : surface, border: `1px solid ${hov ? cs.color + "55" : border}`, borderRadius: "22px", overflow: "hidden", cursor: "pointer", transition: "all 0.32s cubic-bezier(.22,1,.36,1)", transform: hov ? "translateY(-8px)" : "none", boxShadow: hov ? (dark ? `0 32px 80px rgba(0,0,0,0.55),0 0 0 1px ${cs.color}22` : `0 24px 60px rgba(0,0,0,0.12),0 0 0 1px ${cs.color}22`) : "none" }}>
+      style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, background: hov ? (dark ? "rgba(12,14,24,0.98)" : "#fff") : surface, border: `1px solid ${hov ? cs.color + "5c" : border}`, borderRadius: "22px", overflow: "hidden", cursor: "pointer", transition: "transform 0.4s cubic-bezier(.22,1,.36,1), box-shadow 0.4s cubic-bezier(.22,1,.36,1), border-color 0.35s, background 0.35s", transform: hov ? "translateY(-9px)" : "none", boxShadow: hov ? (dark ? `0 36px 88px rgba(0,0,0,0.58),0 0 0 1px ${cs.color}28,0 0 48px ${cs.glow}` : `0 28px 64px rgba(0,0,0,0.12),0 0 0 1px ${cs.color}25`) : "none" }}>
       {/* Thumbnail */}
-      <div style={{ height: "200px", background: `linear-gradient(135deg,${cs.color}22 0%,${cs.color}08 100%)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", borderBottom: `1px solid ${cs.color}18`, overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(circle,${cs.color}18 1px,transparent 1px)`, backgroundSize: "28px 28px", opacity: hov ? 1 : 0.5, transition: "opacity 0.4s" }} />
-        <div style={{ fontSize: "60px", position: "relative", zIndex: 1, filter: `drop-shadow(0 8px 24px ${cs.glow})` }}>{cs.icon}</div>
+      <div style={{ height: "200px", flexShrink: 0, background: `linear-gradient(135deg,${cs.color}22 0%,${cs.color}08 100%)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", borderBottom: `1px solid ${cs.color}18`, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(circle,${cs.color}18 1px,transparent 1px)`, backgroundSize: "28px 28px", opacity: hov ? 1 : 0.5, transition: "opacity 0.45s cubic-bezier(.22,1,.36,1)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: hov ? "3px" : "0px", background: `linear-gradient(90deg,transparent,${cs.accent},${cs.color},transparent)`, opacity: 0.85, transition: "height 0.35s cubic-bezier(.22,1,.36,1)" }} />
+        <div style={{ fontSize: "60px", position: "relative", zIndex: 1, filter: `drop-shadow(0 8px 24px ${cs.glow})`, transform: hov ? "scale(1.04)" : "none", transition: "transform 0.4s cubic-bezier(.22,1,.36,1)" }}>{cs.icon}</div>
         <div style={{ position: "absolute", top: "1rem", left: "1rem" }}><Tag color={cs.accent} bg={cs.color + "18"}>{cs.tag}</Tag></div>
-        <div style={{ position: "absolute", top: "1rem", right: "1rem", background: dark ? "rgba(8,10,18,0.72)" : "rgba(255,255,255,0.88)", backdropFilter: "blur(8px)", border: `1px solid ${cs.color}33`, borderRadius: "100px", padding: "4px 12px" }}>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: cs.accent }}>{cs.metric}</span>
+        <div style={{ position: "absolute", top: "1rem", right: "1rem", background: dark ? "rgba(8,10,18,0.75)" : "rgba(255,255,255,0.9)", backdropFilter: "blur(10px)", border: `1px solid ${cs.color}40`, borderRadius: "100px", padding: "5px 13px", boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: cs.accent, letterSpacing: "0.02em" }}>{cs.metric}</span>
         </div>
       </div>
       {/* Body */}
-      <div style={{ padding: "1.75rem 1.85rem 2rem" }}>
-        <h3 style={{ fontWeight: 800, fontSize: "20px", color: text, margin: "0 0 0.55rem", lineHeight: 1.18, letterSpacing: "-0.025em" }}>{cs.title}</h3>
-        <p style={{ color: muted, fontSize: "15px", lineHeight: 1.75, margin: "0 0 1.5rem", fontWeight: 400 }}>{cs.tagline}</p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: "14px", color: cs.accent, fontWeight: 700, letterSpacing: "0.01em" }}>View Case Study →</span>
+      <div style={{ padding: "1.8rem 1.85rem 2rem", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <h3 style={{ fontWeight: 800, fontSize: "20px", color: text, margin: "0 0 0.55rem", lineHeight: 1.25, letterSpacing: "-0.028em" }}>{cs.title}</h3>
+        <p style={{ color: muted, fontSize: "15px", lineHeight: 1.78, margin: 0, fontWeight: 400, letterSpacing: "0.01em" }}>{cs.tagline}</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginTop: "auto", paddingTop: "1.4rem" }}>
+          <span style={{ fontSize: "14px", color: cs.accent, fontWeight: 700, letterSpacing: "0.02em", display: "inline-flex", alignItems: "center", gap: "6px" }}>View Case Study <span style={{ display: "inline-block", transform: hov ? "translateX(4px)" : "none", transition: "transform 0.3s cubic-bezier(.22,1,.36,1)", filter: hov ? "brightness(1.1)" : "none" }}>→</span></span>
           <span style={{ fontSize: "12px", color: dark ? "#475569" : "#94a3b8" }}>{cs.users}</span>
         </div>
       </div>
@@ -324,31 +657,41 @@ function CaseCard({ cs, dark, surface, border, text, muted, onClick }) {
 
 /* ─── MAIN ────────────────────────────────────────────────── */
 export default function Portfolio() {
+  const navigate = useNavigate();
   const [dark, setDark] = useState(true);
   const [shrink, setShrink] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [activeCS, setActiveCS] = useState(null);
-  const [activeStep, setActiveStep] = useState(null);
-
+  const [workModalItem, setWorkModalItem] = useState(null);
   useEffect(() => {
     setMounted(true);
     const fn = () => setShrink(window.scrollY > 50);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+  useEffect(() => {
+    if (!workModalItem) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = e => e.key === "Escape" && setWorkModalItem(null);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [workModalItem]);
 
   const scrollTo = id => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   const T = {
-    bg:      dark ? "#07090f" : "#f7f8fc",
-    bg2:     dark ? "#0c0f1a" : "#f0f1f7",
+    bg: dark ? "#07090f" : "#f7f8fc",
+    bg2: dark ? "#0c0f1a" : "#f0f1f7",
     surface: dark ? "#0f1220" : "#ffffff",
-    border:  dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.09)",
-    text:    dark ? "#f1f5f9" : "#0f172a",
-    textB:   dark ? "#e2e8f0" : "#1e293b",
-    body:    dark ? "#94a3b8" : "#475569",
-    bodyB:   dark ? "#cbd5e1" : "#334155",
-    subtle:  dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+    border: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.09)",
+    text: dark ? "#f1f5f9" : "#0f172a",
+    textB: dark ? "#e2e8f0" : "#1e293b",
+    body: dark ? "#94a3b8" : "#475569",
+    bodyB: dark ? "#cbd5e1" : "#334155",
+    subtle: dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
   };
 
   return (
@@ -376,9 +719,9 @@ export default function Portfolio() {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "9rem 2.5rem 5rem", maxWidth: "1280px", margin: "0 auto", gap: "5rem", flexWrap: "wrap", position: "relative" }}>
-        <div style={{ position: "absolute", top: "20%", left: "8%", width: "520px", height: "520px", background: "radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 65%)", pointerEvents: "none", filter: "blur(50px)" }} />
-        <div style={{ position: "absolute", bottom: "10%", right: "5%", width: "400px", height: "400px", background: "radial-gradient(circle,rgba(167,139,250,0.07) 0%,transparent 65%)", pointerEvents: "none", filter: "blur(60px)" }} />
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "9.25rem 2.5rem 5.5rem", maxWidth: "1280px", margin: "0 auto", gap: "5.25rem", flexWrap: "wrap", position: "relative" }}>
+        <div style={{ position: "absolute", top: "18%", left: "6%", width: "540px", height: "540px", background: "radial-gradient(circle,rgba(99,102,241,0.14) 0%,rgba(99,102,241,0.04) 38%,transparent 68%)", pointerEvents: "none", filter: "blur(56px)" }} />
+        <div style={{ position: "absolute", bottom: "8%", right: "4%", width: "420px", height: "420px", background: "radial-gradient(circle,rgba(167,139,250,0.1) 0%,rgba(96,165,250,0.04) 40%,transparent 70%)", pointerEvents: "none", filter: "blur(64px)" }} />
 
         {/* Copy */}
         <div style={{ flex: "1 1 460px", position: "relative", zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(40px)", transition: "opacity 1s cubic-bezier(.22,1,.36,1) 0.1s,transform 1s cubic-bezier(.22,1,.36,1) 0.1s" }}>
@@ -387,19 +730,19 @@ export default function Portfolio() {
             <span style={{ fontSize: "13px", color: dark ? "#a5b4fc" : "#4338ca", fontWeight: 600 }}>Available for senior roles &amp; remote work</span>
           </div>
 
-          <h1 style={{ fontSize: "clamp(3.5rem,8vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 0.15rem", color: T.text }}>Himanshu</h1>
-          <h1 style={{ fontSize: "clamp(3.5rem,8vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 1.6rem", background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Grover.</h1>
+          <h1 style={{ fontSize: "clamp(3.5rem,8vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 0.15rem", color: T.text, textRendering: "geometricPrecision" }}>Himanshu</h1>
+          <h1 style={{ fontSize: "clamp(3.5rem,8vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 1.65rem", background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Grover.</h1>
 
-          <p style={{ fontSize: "clamp(1.1rem,2.2vw,1.35rem)", fontWeight: 700, color: T.bodyB, letterSpacing: "-0.025em", margin: "0 0 1.1rem", lineHeight: 1.35 }}>
+          <p style={{ fontSize: "clamp(1.1rem,2.2vw,1.35rem)", fontWeight: 800, color: T.bodyB, letterSpacing: "-0.028em", margin: "0 0 1.15rem", lineHeight: 1.4 }}>
             Senior Product Designer · UI/UX · AI Products
           </p>
-          <p style={{ fontSize: "clamp(1.05rem,1.8vw,1.15rem)", lineHeight: 1.85, color: T.body, maxWidth: "530px", margin: "0 0 2.75rem", fontWeight: 400 }}>
+          <p style={{ fontSize: "clamp(1.05rem,1.8vw,1.15rem)", lineHeight: 1.92, color: T.body, maxWidth: "540px", margin: "0 0 2.85rem", fontWeight: 400, letterSpacing: "0.01em" }}>
             I design products people love and businesses grow with. 6.8+ years building SaaS tools, enterprise platforms, marketplaces, and AI-powered experiences — always with measurable outcomes.
           </p>
 
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap", alignItems: "center" }}>
             <Btn variant="primary" onClick={() => scrollTo("work")} dark={dark}>View Case Studies →</Btn>
-            <Btn variant="ghost" dark={dark}>Download Resume</Btn>
+            <Btn variant="ghost" href="/Himanshu_Grover_Resume_PD.pdf" target="_blank" dark={dark}>Download Resume</Btn>
             <Btn variant="ghost" href="mailto:himanshugrover2710@gmail.com" dark={dark}>Let's Talk</Btn>
           </div>
         </div>
@@ -434,40 +777,88 @@ export default function Portfolio() {
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>Case Studies</h2>
           <p style={{ fontSize: "18px", color: T.body, maxWidth: "520px", lineHeight: 1.78, marginBottom: "3.5rem", fontWeight: 400 }}>Selected projects where design directly created measurable business and user impact.</p>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "1.25rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "1.25rem", alignItems: "stretch" }}>
           {CASE_STUDIES.map((cs, i) => (
-            <Reveal key={cs.id} delay={i * 0.07}>
-              <CaseCard cs={cs} dark={dark} surface={T.surface} border={T.border} text={T.text} muted={T.body} onClick={() => setActiveCS(cs)} />
+            <Reveal key={cs.id} delay={i * 0.07} stretch>
+              <CaseCard cs={cs} dark={dark} surface={T.surface} border={T.border} text={T.text} muted={T.body} onClick={() => navigate(`/case-study/${cs.id}`)} />
             </Reveal>
           ))}
         </div>
       </section>
 
-      {/* ── GALLERY ── */}
+      {/* ── DESIGN PRINCIPLES (nav: Process → #process) ── */}
+      <section id="process" style={{ padding: "7rem 2.5rem", maxWidth: "1280px", margin: "0 auto", background: T.bg2, borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
+        <Reveal>
+          <Eyebrow label="How I Think" />
+          <h2 style={{ fontSize: "clamp(2.1rem,4.5vw,3.1rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.1 }}>Design Principles That Guide My Work</h2>
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, margin: "0 0 2.75rem", fontWeight: 400, maxWidth: "640px" }}>
+            Not a process. A point of view — built from 6.8 years of shipping real products across EdTech, logistics, cybersecurity, and enterprise SaaS.
+          </p>
+        </Reveal>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.15rem" }}>
+          {DESIGN_PRINCIPLES.map((p, i) => (
+            <Reveal key={p.n} delay={0.04 + i * 0.05}>
+              <div
+                style={{
+                  background: T.surface,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: "20px",
+                  padding: "1.65rem 1.5rem 1.7rem",
+                  boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 4px 24px rgba(0,0,0,0.04)",
+                }}
+              >
+                <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.5rem" }}>Principle {p.n}</p>
+                <p style={{ fontSize: "1.1rem", fontWeight: 800, color: T.text, margin: "0 0 0.75rem", letterSpacing: "-0.02em", lineHeight: 1.35 }}>{p.title}</p>
+                <p style={{ fontSize: "16px", color: T.body, margin: 0, lineHeight: 1.78 }}>{p.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SELECTED WORK (BEYOND CASE STUDIES) — 2×2 grid on large screens ── */}
       <section style={{ padding: "5rem 2.5rem 7rem", background: T.bg2 }}>
+        <style>
+          {`
+          .selected-work-card-grid {
+            display: grid;
+            gap: 1.15rem;
+            align-items: stretch;
+            width: 100%;
+            min-width: 0;
+            grid-template-columns: 1fr;
+            grid-auto-rows: auto;
+            isolation: isolate;
+          }
+          @media (min-width: 900px) {
+            .selected-work-card-grid {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .selected-work-card-grid > * {
+              min-width: 0;
+              max-width: 100%;
+            }
+          }
+        `}
+        </style>
         <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <Reveal>
-            <Eyebrow label="Visual Playground" />
-            <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 3.5rem", lineHeight: 1.08 }}>Selected UI Work</h2>
+            <Eyebrow label="Selected Work" />
+            <h2 style={{ fontSize: "clamp(2.2rem,5vw,3.2rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.9rem", lineHeight: 1.08 }}>Beyond Case Studies</h2>
+            <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, maxWidth: "640px", margin: "0 0 2.75rem" }}>
+              {`Live products, real clients, and design exercises — spanning eCommerce, logistics SaaS, mobile, and consumer platforms.`}
+            </p>
           </Reveal>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "1rem" }}>
-            {GALLERY.map((g, i) => {
-              const [hov, setHov] = useState(false);
-              return (
-                <Reveal key={i} delay={i * 0.06}>
-                  <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: hov ? T.surface : "transparent", border: `1px solid ${hov ? g.c + "55" : T.border}`, borderRadius: "20px", padding: "2.1rem 1.75rem", cursor: "pointer", transition: "all 0.28s cubic-bezier(.22,1,.36,1)", transform: hov ? "translateY(-5px)" : "none", boxShadow: hov ? (dark ? "0 20px 60px rgba(0,0,0,0.4)" : "0 20px 60px rgba(0,0,0,0.08)") : "none" }}>
-                    <div style={{ width: "52px", height: "52px", borderRadius: "14px", background: g.c + "1a", border: `1px solid ${g.c}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "26px", color: g.c, marginBottom: "1.25rem" }}>{g.icon}</div>
-                    <p style={{ fontWeight: 800, fontSize: "18px", color: T.text, margin: "0 0 6px", letterSpacing: "-0.025em" }}>{g.label}</p>
-                    <p style={{ fontSize: "14px", color: T.body, margin: 0, lineHeight: 1.6 }}>{g.sub}</p>
-                  </div>
-                </Reveal>
-              );
-            })}
+          <div className="selected-work-card-grid" style={{ boxSizing: "border-box" }}>
+            {SELECTED_WORK.map((item, i) => (
+              <SelectedWorkCard key={item.title} item={item} delay={i * 0.05} dark={dark} T={T} onModalOpen={setWorkModalItem} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── PROCESS ── */}
+      {/*
+      ── PROCESS ──
       <section id="process" style={{ padding: "7rem 2.5rem", maxWidth: "1280px", margin: "0 auto" }}>
         <Reveal>
           <Eyebrow label="Design Process" />
@@ -492,41 +883,37 @@ export default function Portfolio() {
           })}
         </div>
       </section>
+      */}
 
       {/* ── SKILLS ── */}
       <section id="skills" style={{ padding: "5rem 2.5rem 7rem", background: T.bg2 }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "5.5rem", alignItems: "start" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <Reveal>
             <Eyebrow label="Skills & Tools" />
-            <h2 style={{ fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.1 }}>What I Bring</h2>
-            <p style={{ fontSize: "17px", color: T.body, lineHeight: 1.82, marginBottom: "1.75rem", fontWeight: 400 }}>Deeply technical design skills combined with strategic product thinking and a strong bias for outcomes over aesthetics.</p>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", marginBottom: "0.75rem" }}>Core Tools</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "1.5rem" }}>
-              {SKILLS_PRIMARY.map(s => <Pill key={s} dark={dark}>{s}</Pill>)}
-            </div>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color: T.body, textTransform: "uppercase", marginBottom: "0.75rem" }}>Also Proficient In</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {SKILLS_SEC.map(s => <Pill key={s} dark={dark}>{s}</Pill>)}
-            </div>
+            <h2 style={{ fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.1 }}>What I Work With</h2>
+            <p style={{ fontSize: "17px", color: T.body, lineHeight: 1.82, margin: "0 0 2.5rem", fontWeight: 400, maxWidth: "720px" }}>
+              {`6.8 years across EdTech, logistics, cybersecurity, and enterprise SaaS — these are the tools and skills I use daily, and the ones I've shipped real products with.`}
+            </p>
           </Reveal>
-          <Reveal delay={0.12}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem", paddingTop: "2.75rem" }}>
-              {SKILL_BARS.map((s, i) => {
-                const ref = useRef(); const v = useInView(ref, 0.2);
-                return (
-                  <div key={i} ref={ref}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "9px" }}>
-                      <span style={{ fontSize: "15px", fontWeight: 700, color: T.textB, letterSpacing: "-0.015em" }}>{s.name}</span>
-                      <span style={{ fontSize: "13px", color: T.body, fontWeight: 500 }}>{s.level}%</span>
-                    </div>
-                    <div style={{ height: "4px", background: dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)", borderRadius: "100px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: v ? s.level + "%" : "0%", background: "linear-gradient(90deg,#6366f1,#a78bfa)", borderRadius: "100px", transition: `width 1.3s cubic-bezier(.22,1,.36,1) ${i * 0.08}s` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.15rem" }}>
+            {SKILLS_CATEGORIES.map((c, i) => (
+              <Reveal key={c.label} delay={0.04 + i * 0.04}>
+                <div
+                  style={{
+                    background: T.surface,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "18px",
+                    padding: "1.25rem 1.35rem 1.3rem",
+                    height: "100%",
+                    boxShadow: dark ? "0 8px 28px rgba(0,0,0,0.16)" : "0 2px 16px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.1em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.55rem" }}>{c.label}</p>
+                  <p style={{ fontSize: "15px", color: T.textB, margin: 0, lineHeight: 1.72 }}>{c.line}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -535,31 +922,14 @@ export default function Portfolio() {
         <Reveal>
           <Eyebrow label="Testimonials" />
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>What People Say</h2>
-          <p style={{ fontSize: "18px", color: T.body, maxWidth: "500px", lineHeight: 1.78, marginBottom: "3.5rem" }}>From the PMs, engineers, and founders I've shipped with.</p>
+          <p style={{ fontSize: "18px", color: T.body, maxWidth: "560px", lineHeight: 1.78, marginBottom: "3.5rem" }}>
+            Recommendations from managers and teammates — each with a one-click path to verify on LinkedIn.
+          </p>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "1.25rem" }}>
-          {TESTIMONIALS.map((t, i) => {
-            const [hov, setHov] = useState(false);
-            return (
-              <Reveal key={i} delay={i * 0.08}>
-                <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{ background: T.surface, border: `1px solid ${hov ? t.color + "44" : T.border}`, borderRadius: "22px", padding: "2.1rem 2rem", transition: "all 0.3s cubic-bezier(.22,1,.36,1)", transform: hov ? "translateY(-5px)" : "none", boxShadow: hov ? (dark ? "0 24px 70px rgba(0,0,0,0.45)" : "0 24px 70px rgba(0,0,0,0.09)") : "none" }}>
-                  <div style={{ fontSize: "48px", lineHeight: 1, color: t.color + "44", fontFamily: "Georgia,serif", marginBottom: "0.25rem" }}>"</div>
-                  <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.82, margin: "0 0 1.75rem", fontWeight: 400 }}>
-                    {t.quote.split(t.highlight).map((part, j, arr) =>
-                      j < arr.length - 1 ? [part, <mark key={j} style={{ background: t.color + "20", color: dark ? t.accent : t.color, fontWeight: 600, borderRadius: "4px", padding: "0 3px" }}>{t.highlight}</mark>] : part
-                    )}
-                  </p>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingTop: "1.25rem", borderTop: `1px solid ${T.border}` }}>
-                    <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: t.color + "1a", border: `2px solid ${t.color}33`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800, color: t.color, flexShrink: 0 }}>{t.initials}</div>
-                    <div>
-                      <p style={{ fontWeight: 700, fontSize: "15px", color: T.text, margin: "0 0 2px", letterSpacing: "-0.015em" }}>{t.name}</p>
-                      <p style={{ fontSize: "13px", color: T.body, margin: 0 }}>{t.role} · <span style={{ color: t.color, fontWeight: 600 }}>{t.co}</span></p>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            );
-          })}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "1.35rem" }}>
+          {TESTIMONIALS.map((t, i) => (
+            <TestimonialCard key={t.name} t={t} delay={i * 0.08} dark={dark} T={T} />
+          ))}
         </div>
       </section>
 
@@ -568,15 +938,27 @@ export default function Portfolio() {
         <div style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gridTemplateColumns: "1.7fr 1fr", gap: "6rem", alignItems: "center" }}>
           <Reveal>
             <Eyebrow label="About Me" />
-            <h2 style={{ fontSize: "clamp(2rem,4.5vw,3.1rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 1.5rem", lineHeight: 1.1 }}>I solve complex product problems through design.</h2>
-            <p style={{ fontSize: "17px", color: T.bodyB, lineHeight: 1.88, marginBottom: "1.15rem", fontWeight: 400 }}>
-              I'm a Senior Product Designer who operates at the intersection of user psychology, business strategy, and engineering reality. Over 6.8 years I've shipped products across fintech, logistics, marketplaces, and manufacturing — products that people actually use, and that companies grow with.
+            <h2 style={{ fontSize: "clamp(2rem,4.5vw,3.1rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 1.5rem", lineHeight: 1.1 }}>
+              I turn complex, ambiguous product problems into clear, structured experiences.
+            </h2>
+            <p style={{ fontSize: "17px", color: T.bodyB, lineHeight: 1.9, marginBottom: "1.2rem", fontWeight: 400, letterSpacing: "0.01em" }}>
+              {`I'm a Senior Product Designer with 6.8 years across EdTech, logistics, cybersecurity, and enterprise SaaS. I've designed ebook platforms for global publishers like Pearson and HMH, rebuilt fraud intelligence dashboards for enterprise security teams, and shipped aggregator tools used by thousands of logistics operators daily.`}
             </p>
-            <p style={{ fontSize: "16px", color: T.body, lineHeight: 1.88, marginBottom: "2.1rem" }}>
-              My process is research-grounded, opinion-led, and always tied to outcomes. I don't hand off pixels — I embed with teams, understand tradeoffs, and design systems that scale beyond the first release.
+            <p style={{ fontSize: "16px", color: T.body, lineHeight: 1.9, marginBottom: "1.2rem", letterSpacing: "0.01em" }}>
+              {`What makes me different is where I sit. I understand engineering constraints well enough to have implemented my own designs in React and HTML/CSS. I understand accessibility deeply enough to have designed to WCAG 2.1 standards for 3.5 years without shortcuts. And I understand business well enough to frame every design decision around outcomes, not opinions.`}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.85rem" }}>
-              {["Systems thinker","Business-impact focused","Engineering-native","Senior ownership mindset","Research-driven","Scalable design systems"].map(x => (
+            <p style={{ fontSize: "16px", color: T.body, lineHeight: 1.9, marginBottom: "2.15rem", letterSpacing: "0.01em" }}>
+              {`I work best in environments where the problem is genuinely hard — where there's no obvious answer, no clean data, and no competitor to copy. That's where structured thinking and strong design instincts matter most.`}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.95rem" }}>
+              {[
+                "WCAG 2.1 accessibility standard",
+                "Research-driven without perfect data",
+                "Engineering-native collaborator",
+                "Systems thinker across complex products",
+                "Multi-role UX for enterprise platforms",
+                "Shipped across 6+ industries globally",
+              ].map(x => (
                 <div key={x} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <span style={{ color: "#6366f1", fontWeight: 900, fontSize: "14px", flexShrink: 0 }}>→</span>
                   <span style={{ fontSize: "15px", color: T.bodyB, fontWeight: 500 }}>{x}</span>
@@ -585,14 +967,14 @@ export default function Portfolio() {
             </div>
           </Reveal>
           <Reveal delay={0.15}>
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: "24px", padding: "2rem", boxShadow: dark ? "0 24px 80px rgba(0,0,0,0.4)" : "0 24px 80px rgba(0,0,0,0.07)" }}>
-              <div style={{ width: "76px", height: "76px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "34px", marginBottom: "1.35rem", boxShadow: "0 8px 28px rgba(99,102,241,0.4)" }}>🎨</div>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: "24px", padding: "2.1rem 2rem", boxShadow: dark ? "0 28px 90px rgba(0,0,0,0.45),0 0 0 1px rgba(99,102,241,0.08)" : "0 24px 80px rgba(0,0,0,0.07),0 0 0 1px rgba(99,102,241,0.06)" }}>
+              <div style={{ width: "76px", height: "76px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "34px", marginBottom: "1.35rem", boxShadow: "0 10px 32px rgba(99,102,241,0.45)" }}>🎨</div>
               <p style={{ fontWeight: 900, fontSize: "21px", color: T.text, margin: "0 0 4px", letterSpacing: "-0.03em" }}>Himanshu Grover</p>
               <p style={{ fontSize: "14px", color: "#6366f1", fontWeight: 600, margin: "0 0 1.5rem" }}>Senior Product Designer</p>
-              {[["Location","Delhi, India · Remote OK"],["Availability","Open to opportunities"],["Focus","SaaS · Enterprise · AI"]].map(([k, v]) => (
-                <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderBottom: `1px solid ${T.border}` }}>
-                  <span style={{ fontSize: "13px", color: T.body }}>{k}</span>
-                  <span style={{ fontSize: "13px", color: T.textB, fontWeight: 600 }}>{v}</span>
+              {[["Location", "Delhi, India · Remote OK"], ["Availability", "Open to opportunities"], ["Focus", "EdTech · Logistics · Cybersecurity · Enterprise SaaS"]].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${T.border}` }}>
+                  <span style={{ fontSize: "13px", color: T.body, fontWeight: 500 }}>{k}</span>
+                  <span style={{ fontSize: "13px", color: T.textB, fontWeight: 600, textAlign: "right", maxWidth: "58%" }}>{v}</span>
                 </div>
               ))}
             </div>
@@ -601,18 +983,18 @@ export default function Portfolio() {
       </section>
 
       {/* ── CONTACT ── */}
-      <section id="contact" style={{ padding: "8rem 2.5rem", maxWidth: "880px", margin: "0 auto", textAlign: "center", position: "relative" }}>
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "700px", height: "500px", background: "radial-gradient(ellipse,rgba(99,102,241,0.11) 0%,transparent 70%)", pointerEvents: "none" }} />
+      <section id="contact" style={{ padding: "8.5rem 2.5rem", maxWidth: "880px", margin: "0 auto", textAlign: "center", position: "relative" }}>
+        <div style={{ position: "absolute", top: "45%", left: "50%", transform: "translate(-50%,-50%)", width: "760px", height: "520px", background: "radial-gradient(ellipse at center,rgba(99,102,241,0.14) 0%,rgba(167,139,250,0.05) 42%,transparent 72%)", pointerEvents: "none", filter: "blur(2px)" }} />
         <Reveal>
           <Eyebrow label="Let's Connect" center />
-          <h2 style={{ fontSize: "clamp(2.6rem,6vw,4.5rem)", fontWeight: 900, letterSpacing: "-0.055em", color: T.text, margin: "0 0 1.1rem", lineHeight: 1.02 }}>
+          <h2 style={{ fontSize: "clamp(2.6rem,6vw,4.5rem)", fontWeight: 900, letterSpacing: "-0.055em", color: T.text, margin: "0 0 1.2rem", lineHeight: 1.02 }}>
             Let's build products<br />
             <span style={{ background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>users love.</span>
           </h2>
-          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, maxWidth: "520px", margin: "0 auto 2.75rem", fontWeight: 400 }}>
-            Available for Senior Product Designer, UI/UX, and remote opportunities globally.
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.85, maxWidth: "520px", margin: "0 auto 2.9rem", fontWeight: 400, letterSpacing: "0.01em" }}>
+            Open to senior product design, UI/UX, and fully remote roles worldwide.
           </p>
-          <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2rem" }}>
+          <div style={{ display: "flex", gap: "0.85rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2.1rem" }}>
             <Btn variant="primary" href="mailto:himanshugrover2710@gmail.com" dark={dark}>himanshugrover2710@gmail.com →</Btn>
             <Btn variant="ghost" dark={dark}>View LinkedIn</Btn>
           </div>
@@ -625,14 +1007,14 @@ export default function Portfolio() {
         <span style={{ fontWeight: 900, fontSize: "17px", letterSpacing: "-0.05em", color: T.text }}><span style={{ color: "#6366f1" }}>H</span>G.</span>
         <span style={{ color: T.body, fontSize: "13px" }}>© 2026 Himanshu Grover — Designed with intention.</span>
         <div style={{ display: "flex", gap: "1.25rem" }}>
-          {["Work","Process","About","Contact"].map(l => (
+          {["Work", "Process", "About", "Contact"].map(l => (
             <button key={l} onClick={() => scrollTo(l.toLowerCase())} style={{ background: "none", border: "none", color: T.body, fontSize: "13px", cursor: "pointer", fontFamily: "inherit", transition: "color 0.15s" }}
               onMouseEnter={e => e.target.style.color = T.text} onMouseLeave={e => e.target.style.color = T.body}>{l}</button>
           ))}
         </div>
       </footer>
 
-      {activeCS && <Modal cs={activeCS} onClose={() => setActiveCS(null)} />}
+      {workModalItem ? <SelectedWorkModal item={workModalItem} onClose={() => setWorkModalItem(null)} T={T} dark={dark} /> : null}
     </div>
   );
 }

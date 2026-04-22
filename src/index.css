@@ -1,0 +1,38 @@
+/* Modern scrollbar — dark track, indigo gradient thumb (matches portfolio accent) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6366f1 rgba(7, 9, 15, 0.85);
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(7, 9, 15, 0.6);
+  border-radius: 100px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  border-radius: 100px;
+  border: 2px solid #07090f;
+  min-height: 32px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: #818cf8;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
