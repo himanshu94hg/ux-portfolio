@@ -34,7 +34,7 @@ function ApateCaseStudyInner() {
           background: T.subtle,
           border: `1px solid ${T.border}`,
           borderRadius: "20px",
-          padding: "1.75rem 1.5rem",
+          padding: "clamp(1.15rem, 3.8vw, 1.75rem) clamp(1rem, 3.5vw, 1.5rem)",
         }}
       >
         {children}
@@ -65,9 +65,9 @@ function ApateCaseStudyInner() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "0.9rem",
-          margin: "1.5rem 0 0",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
+          gap: "clamp(0.65rem, 2vw, 0.9rem)",
+          margin: "clamp(1.1rem, 3vw, 1.5rem) 0 0",
         }}
       >
         {children}
@@ -77,7 +77,7 @@ function ApateCaseStudyInner() {
 
   function MetaCell({ label, value, sub }) {
     return (
-      <div style={{ background: T.subtle, border: `1px solid ${T.border}`, borderRadius: "14px", padding: "1rem" }}>
+      <div style={{ background: T.subtle, border: `1px solid ${T.border}`, borderRadius: "14px", padding: "clamp(0.75rem, 2.5vw, 1rem) clamp(0.8rem, 2.8vw, 1rem)" }}>
         <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: C.ACCENT_DIM, textTransform: "uppercase", margin: "0 0 0.4rem" }}>{label}</p>
         <p style={{ fontSize: "15px", fontWeight: 600, margin: 0, lineHeight: 1.45, color: T.textB }}>{value}</p>
         {sub ? <p style={{ fontSize: "13px", color: T.body, margin: "0.5rem 0 0", lineHeight: 1.55 }}>{sub}</p> : null}
@@ -149,17 +149,18 @@ function ApateCaseStudyInner() {
           style={{
             background: `linear-gradient(135deg,${C.ACCENT}16 0%,${C.ACCENT}05 50%,transparent 100%)`,
             border: `1px solid ${C.ACCENT}33`,
-            borderRadius: "24px",
-            padding: "2.4rem 1.85rem 2rem",
-            marginBottom: "2rem",
+            borderRadius: "clamp(18px, 4vw, 24px)",
+            padding: "clamp(1.1rem, 4vw, 2.4rem) clamp(0.85rem, 3.6vw, 1.85rem) clamp(1.05rem, 3.8vw, 2rem)",
+            marginBottom: "clamp(1rem, 3vw, 2rem)",
+            overflow: "visible",
           }}
         >
-          <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.2em", color: C.ACCENT_DIM, margin: "0 0 0.5rem" }}>CASE STUDY</p>
-          <h1 style={{ fontSize: "clamp(1.6rem,3.6vw,2.05rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1.1, margin: "0 0 0.35rem", color: T.text }}>{H.brand}</h1>
-          <p style={{ fontSize: "clamp(1.05rem,2.2vw,1.2rem)", fontWeight: 600, color: T.textB, margin: "0 0 0.6rem" }}>{H.productLine}</p>
-          <p style={{ color: T.body, fontSize: "1.05rem", lineHeight: 1.75, margin: "0 0 1.25rem" }}>{H.tagline}</p>
+          <p style={{ fontSize: "clamp(10px, 2.8vw, 12px)", fontWeight: 800, letterSpacing: "0.2em", color: C.ACCENT_DIM, margin: "0 0 0.5rem" }}>CASE STUDY</p>
+          <h1 style={{ fontSize: "clamp(1.28rem, 4.8vw + 0.1rem, 2.05rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1.12, margin: "0 0 0.35rem", color: T.text }}>{H.brand}</h1>
+          <p style={{ fontSize: "clamp(0.98rem, 3.2vw, 1.2rem)", fontWeight: 600, color: T.textB, margin: "0 0 0.5rem" }}>{H.productLine}</p>
+          <p style={{ color: T.body, fontSize: "clamp(0.94rem, 3.5vw, 1.05rem)", lineHeight: 1.62, margin: "0 0 1rem", fontWeight: 400 }}>{H.tagline}</p>
           <H3>Summary</H3>
-          <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.85, margin: "0 0 0" }}>{H.oneLine}</p>
+          <p style={{ color: T.bodyB, fontSize: "clamp(0.94rem, 3.4vw, 1rem)", lineHeight: 1.68, margin: "0 0 0" }}>{H.oneLine}</p>
           <MetaGrid>
             <MetaCell label="Role" value={H.role} />
             <MetaCell label="Company" value={H.company} />

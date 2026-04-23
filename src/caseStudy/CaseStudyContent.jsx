@@ -32,7 +32,7 @@ function MBlock({ label, color, children, T, dark }) {
         background: dark ? "rgba(255,255,255,0.025)" : T.subtle,
         border: `1px solid ${T.border}`,
         borderRadius: "16px",
-        padding: "1.35rem 1.5rem",
+        padding: "clamp(1.05rem, 3.5vw, 1.35rem) clamp(1rem, 3.2vw, 1.5rem)",
       }}
     >
       <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color, textTransform: "uppercase", margin: "0 0 0.8rem" }}>{label}</p>
@@ -72,16 +72,17 @@ export function CaseStudyContent({ cs }) {
         style={{
           background: `linear-gradient(135deg,${cs.color}25 0%,${cs.color}08 60%,transparent 100%)`,
           borderBottom: `1px solid ${cs.color}22`,
-          padding: "2.75rem 2.5rem 2.25rem",
+          padding: "clamp(1.35rem, 4.5vw, 2.75rem) clamp(1rem, 4vw, 2.5rem) clamp(1.2rem, 4vw, 2.25rem)",
           position: "relative",
+          overflow: "visible",
         }}
       >
         <Tag color={cs.accent} bg={cs.color + "18"} dark={dark}>
           {cs.tag}
         </Tag>
-        <h1 style={{ fontSize: "clamp(1.85rem,4.5vw,2.5rem)", fontWeight: 900, color: T.text, margin: "0.9rem 0 0.6rem", lineHeight: 1.08, letterSpacing: "-0.04em" }}>{cs.title}</h1>
-        <p style={{ color: T.body, fontSize: "17px", lineHeight: 1.7, maxWidth: "600px", margin: "0 0 1.75rem", fontWeight: 400 }}>{cs.tagline}</p>
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <h1 style={{ fontSize: "clamp(1.32rem, 5vw + 0.15rem, 2.5rem)", fontWeight: 900, color: T.text, margin: "clamp(0.65rem, 2.5vw, 0.9rem) 0 clamp(0.45rem, 2vw, 0.6rem)", lineHeight: 1.1, letterSpacing: "-0.04em" }}>{cs.title}</h1>
+        <p style={{ color: T.body, fontSize: "clamp(0.94rem, 3.6vw, 1.0625rem)", lineHeight: 1.62, margin: "0 0 clamp(1rem, 3vw, 1.75rem)", fontWeight: 400 }}>{cs.tagline}</p>
+        <div style={{ display: "flex", gap: "clamp(0.65rem, 2vw, 1rem)", flexWrap: "wrap" }}>
           {[[cs.metric, "Key metric", cs.color], [cs.users, "Context", null]].map(([val, lbl, c]) => (
             <div
               key={lbl}
@@ -89,7 +90,7 @@ export function CaseStudyContent({ cs }) {
                 background: c ? c + "18" : T.subtle,
                 border: `1px solid ${c ? c + "33" : T.border}`,
                 borderRadius: "14px",
-                padding: "0.9rem 1.35rem",
+                padding: "clamp(0.75rem, 2.5vw, 0.9rem) clamp(0.85rem, 2.8vw, 1.35rem)",
               }}
             >
               <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", color: c ? cs.accent : T.body, textTransform: "uppercase", margin: "0 0 4px" }}>{lbl}</p>
@@ -99,8 +100,8 @@ export function CaseStudyContent({ cs }) {
         </div>
       </div>
 
-      <div style={{ padding: "2.25rem 2.5rem 2.75rem", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.1rem" }}>
+      <div style={{ padding: "clamp(1.25rem, 4vw, 2.25rem) clamp(1rem, 4vw, 2.5rem) clamp(1.5rem, 4.5vw, 2.75rem)", display: "flex", flexDirection: "column", gap: "clamp(1rem, 3vw, 1.25rem)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: "1.1rem" }}>
           <MBlock label="Challenge" color={cs.accent} T={T} dark={dark}>
             <p style={{ color: T.body, fontSize: "15px", lineHeight: 1.8, margin: 0 }}>{cs.challenge}</p>
           </MBlock>

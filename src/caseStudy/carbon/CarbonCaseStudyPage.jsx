@@ -17,6 +17,8 @@ const wrap = { maxWidth: "880px", margin: "0 auto" };
 
 function CarbonCaseStudyInner() {
   const { T, dark } = useCaseStudyTheme();
+  const sectionGap = "clamp(2rem, 7vw, 3.5rem)";
+  const heroPad = "clamp(1.05rem, 4vw, 2.5rem) clamp(0.85rem, 3.6vw, 2rem) clamp(1.05rem, 4vw, 2rem)";
   const screenShadow = dark
     ? "0 24px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.2)"
     : "0 18px 48px rgba(15,23,42,0.12), 0 0 0 1px rgba(0,0,0,0.06)";
@@ -43,12 +45,12 @@ function CarbonCaseStudyInner() {
           borderRadius: "16px",
           border: `1px dashed rgba(99,102,241,${dark ? 0.35 : 0.45})`,
           background: dark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.08)",
-          minHeight: "min(42vw, 320px)",
+          minHeight: "clamp(140px, 38vw, 320px)",
           maxWidth: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "2rem 1.25rem",
+          padding: "clamp(1.15rem, 4vw, 2rem) clamp(0.9rem, 3vw, 1.25rem)",
           textAlign: "center",
         }}
       >
@@ -74,7 +76,7 @@ function CarbonCaseStudyInner() {
           background: T.subtle,
           border: `1px solid ${T.border}`,
           borderRadius: "20px",
-          padding: "1.75rem 1.5rem",
+          padding: "clamp(1.15rem, 3.8vw, 1.75rem) clamp(1rem, 3.5vw, 1.5rem)",
           ...style,
         }}
       >
@@ -101,20 +103,21 @@ function CarbonCaseStudyInner() {
           style={{
             background: `linear-gradient(135deg,${ACCENT}18 0%,${ACCENT}06 50%,transparent 100%)`,
             border: "1px solid rgba(99,102,241,0.2)",
-            borderRadius: "24px",
-            padding: "2.5rem 2rem 2rem",
-            marginBottom: "1.5rem",
+            borderRadius: "clamp(18px, 4vw, 24px)",
+            padding: heroPad,
+            marginBottom: "clamp(1rem, 3vw, 1.5rem)",
+            overflow: "visible",
           }}
         >
-          <h1 style={{ fontSize: "clamp(1.9rem,4.5vw,2.6rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1.1, margin: "0 0 1rem", color: T.text }}>{hero.title}</h1>
-          <p style={{ color: T.body, fontSize: "18px", lineHeight: 1.75, maxWidth: "640px", margin: "0 0 1.75rem" }}>{hero.lede}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: "1rem", marginBottom: "1.75rem" }}>
+          <h1 style={{ fontSize: "clamp(1.32rem, 5.2vw + 0.15rem, 2.6rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1.12, margin: "0 0 clamp(0.55rem, 2vw, 1rem)", color: T.text }}>{hero.title}</h1>
+          <p style={{ color: T.body, fontSize: "clamp(0.94rem, 3.7vw, 1.125rem)", lineHeight: 1.62, margin: "0 0 clamp(1rem, 3vw, 1.75rem)", fontWeight: 400 }}>{hero.lede}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%, 160px),1fr))", gap: "clamp(0.65rem, 2vw, 1rem)", marginBottom: "clamp(1rem, 3vw, 1.75rem)" }}>
             {[
               ["Role", hero.role],
               ["Timeline", hero.timeline],
               ["Scope", hero.scope],
             ].map(([k, v]) => (
-              <div key={k} style={{ background: T.subtle, border: `1px solid ${T.border}`, borderRadius: "14px", padding: "1rem 1.15rem" }}>
+              <div key={k} style={{ background: T.subtle, border: `1px solid ${T.border}`, borderRadius: "14px", padding: "clamp(0.75rem, 2.5vw, 1rem) clamp(0.8rem, 2.8vw, 1.15rem)" }}>
                 <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: ACCENT_DIM, textTransform: "uppercase", margin: "0 0 0.4rem" }}>{k}</p>
                 <p style={{ fontSize: "15px", fontWeight: 600, color: T.textB, margin: 0, lineHeight: 1.45 }}>{v}</p>
               </div>
@@ -125,7 +128,7 @@ function CarbonCaseStudyInner() {
       </div>
 
       {/* The Challenge */}
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <Card>
           <SectionHeading>{challenge.title}</SectionHeading>
           <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.85, margin: "0 0 1.25rem" }}>{challenge.intro}</p>
@@ -138,7 +141,7 @@ function CarbonCaseStudyInner() {
       </div>
 
       {/* Analytics */}
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <SectionHeading>{analytics.title}</SectionHeading>
         <p style={{ color: T.body, fontSize: "16px", lineHeight: 1.8, margin: "0 0 1rem" }}>{analytics.body}</p>
         <p style={{ fontSize: "13px", fontWeight: 700, color: ACCENT_DIM, letterSpacing: "0.04em", margin: "0 0 0.65rem" }}>Key Features</p>
@@ -147,7 +150,7 @@ function CarbonCaseStudyInner() {
       </div>
 
       {/* Strategy */}
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <SectionHeading>{strategy.title}</SectionHeading>
         <p style={{ color: T.body, fontSize: "16px", lineHeight: 1.8, margin: "0 0 1rem" }}>{strategy.body}</p>
         <p style={{ fontSize: "13px", fontWeight: 700, color: ACCENT_DIM, letterSpacing: "0.04em", margin: "0 0 0.65rem" }}>Key Features</p>
@@ -156,7 +159,7 @@ function CarbonCaseStudyInner() {
       </div>
 
       {/* Reporting */}
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <SectionHeading>{reporting.title}</SectionHeading>
         <p style={{ color: T.body, fontSize: "16px", lineHeight: 1.8, margin: "0 0 1rem" }}>{reporting.body}</p>
         <p style={{ fontSize: "13px", fontWeight: 700, color: ACCENT_DIM, letterSpacing: "0.04em", margin: "0 0 0.65rem" }}>Key Features</p>
@@ -165,7 +168,7 @@ function CarbonCaseStudyInner() {
       </div>
 
       {/* Outcomes */}
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <Card>
           <SectionHeading>{outcomes.title}</SectionHeading>
           <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.85, margin: "0 0 1.25rem" }}>{outcomes.intro}</p>
@@ -176,7 +179,7 @@ function CarbonCaseStudyInner() {
         </Card>
       </div>
 
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <Card>
           <h2 style={{ fontSize: "clamp(1.35rem,3.2vw,1.75rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 0.75rem", color: T.text }}>{contribution.title}</h2>
           <p style={{ fontSize: "16px", fontWeight: 500, color: T.bodyB, margin: "0 0 1rem", lineHeight: 1.6 }}>{contribution.intro}</p>
@@ -186,17 +189,17 @@ function CarbonCaseStudyInner() {
         </Card>
       </div>
 
-      <div style={{ ...wrap, marginTop: "3.5rem" }}>
+      <div style={{ ...wrap, marginTop: sectionGap }}>
         <h2 style={{ fontSize: "clamp(1.35rem,3.2vw,1.75rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 1rem", color: T.text }}>{keyLearning.title}</h2>
         <div
           style={{
             borderLeft: `3px solid ${ACCENT}`,
             background: dark ? "rgba(99,102,241,0.08)" : "rgba(99,102,241,0.1)",
             borderRadius: "0 16px 16px 0",
-            padding: "1.5rem 1.5rem 1.5rem 1.35rem",
+            padding: "clamp(1.1rem, 3.5vw, 1.5rem) clamp(1rem, 3vw, 1.5rem) clamp(1.1rem, 3.5vw, 1.5rem) clamp(0.9rem, 2.5vw, 1.35rem)",
           }}
         >
-          <p style={{ color: T.textB, fontSize: "17px", lineHeight: 1.8, margin: 0, fontStyle: "italic" }}>{keyLearning.body}</p>
+          <p style={{ color: T.textB, fontSize: "clamp(15px, 3.6vw, 17px)", lineHeight: 1.72, margin: 0, fontStyle: "italic" }}>{keyLearning.body}</p>
         </div>
       </div>
     </>

@@ -37,7 +37,7 @@ export function CaseStudyPageChrome({ children, backLabel = "Back to portfolio" 
           background: T.bg,
           color: T.text,
           fontFamily: font,
-          padding: "1.5rem 1.25rem 3rem",
+          padding: "clamp(0.85rem, 3.5vw, 1.5rem) clamp(0.75rem, 3.2vw, 1.25rem) clamp(2rem, 6vw, 3rem)",
           transition: "background 0.35s ease, color 0.35s ease",
         }}
       >
@@ -48,11 +48,11 @@ export function CaseStudyPageChrome({ children, backLabel = "Back to portfolio" 
         <div
           style={{
             maxWidth: "880px",
-            margin: "0 auto 1.5rem",
+            margin: "0 auto clamp(1rem, 3vw, 1.5rem)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: "1rem",
+            gap: "clamp(0.5rem, 2vw, 1rem)",
           }}
         >
           <Link
@@ -60,14 +60,15 @@ export function CaseStudyPageChrome({ children, backLabel = "Back to portfolio" 
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
+              gap: "6px",
+              fontSize: "clamp(12px, 3.2vw, 14px)",
               fontWeight: 600,
               color: T.body,
               textDecoration: "none",
               letterSpacing: "-0.01em",
-              padding: "8px 0",
+              padding: "6px 0",
               transition: "color 0.2s",
+              minWidth: 0,
             }}
           >
             <span style={{ fontSize: "18px", lineHeight: 1 }} aria-hidden>
