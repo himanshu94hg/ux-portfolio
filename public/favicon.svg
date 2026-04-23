@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="HG">
+  <rect width="32" height="32" rx="9" fill="#f7f8fc"/>
+  <text
+    x="16"
+    y="21.5"
+    text-anchor="middle"
+    font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif"
+    font-weight="900"
+    font-size="11.5"
+    letter-spacing="-0.07em"
+  >
+    <tspan fill="#6366f1">H</tspan><tspan fill="#0f172a">G.</tspan>
+  </text>
+</svg>

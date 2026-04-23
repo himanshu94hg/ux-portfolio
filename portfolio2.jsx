@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CASE_STUDIES } from "./src/data/caseStudiesData.js";
 import { readStoredThemeIsDark, persistThemePreference } from "./src/themeStorage.js";
@@ -11,7 +11,7 @@ const STATS = [
   { value: 6.8, suffix: "+", unit: "Years", label: "Building Digital Products" },
   { value: 30, suffix: "+", unit: "Projects", label: "Launched & Delivered" },
   { value: "", suffix: "", unit: "Global  Markets", label: "UK · US · India · Australia" },
-  { value: "6", suffix: "+", unit: "Industries", label: "EdTech · Logistics · Cybersecurity · eCommerce · Enterprise SaaS · Travel / Hospitality" },
+  { value: 6, suffix: "+", unit: "Industries", label: "EdTech · Logistics · Cybersecurity · eCommerce · Enterprise SaaS · Travel / Hospitality" },
 ];
 
 const PROCESS_STEPS = [
@@ -193,33 +193,67 @@ function useMediaQuery(query) {
   return matches;
 }
 
-function useInView(ref, threshold = 0.12) {
+function useInView(ref, options = {}) {
+  const { threshold = 0, rootMargin = "0px 0px 72px 0px" } =
+    typeof options === "number" ? { threshold: options } : options;
   const [v, setV] = useState(false);
-  useEffect(() => {
-    const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setV(true); o.disconnect(); } }, { threshold });
-    if (ref.current) o.observe(ref.current);
+  useLayoutEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      setV(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+    const o = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setV(true);
+          o.disconnect();
+        }
+      },
+      { threshold, rootMargin }
+    );
+    o.observe(el);
     return () => o.disconnect();
-  }, []);
+  }, [threshold, rootMargin]);
   return v;
 }
 
 /* ─── PRIMITIVES ──────────────────────────────────────────── */
+/** Outer node is observed (no transform/opacity) so IntersectionObserver geometry matches layout — inner node runs the animation. */
 function Reveal({ children, delay = 0, y = 28, stretch = false, style: styleProp }) {
-  const ref = useRef(); const v = useInView(ref);
+  const ref = useRef();
+  const v = useInView(ref);
+  const outerStyle = {
+    ...(stretch
+      ? {
+          display: "flex",
+          flexDirection: "column",
+          alignSelf: "stretch",
+          minHeight: 0,
+          minWidth: 0,
+          width: "100%",
+          maxWidth: "100%",
+          height: "100%",
+          boxSizing: "border-box",
+        }
+      : {}),
+    ...(styleProp || {}),
+  };
+  const innerStyle = {
+    opacity: v ? 1 : 0,
+    transform: v ? "none" : `translateY(${y}px)`,
+    transition: `opacity 0.75s cubic-bezier(.22,1,.36,1) ${delay}s, transform 0.75s cubic-bezier(.22,1,.36,1) ${delay}s`,
+    minWidth: 0,
+    width: "100%",
+    boxSizing: "border-box",
+    ...(stretch
+      ? { flex: 1, display: "flex", flexDirection: "column", minHeight: 0, maxWidth: "100%", height: "100%" }
+      : {}),
+  };
   return (
-    <div
-      ref={ref}
-      style={{
-        opacity: v ? 1 : 0,
-        transform: v ? "none" : `translateY(${y}px)`,
-        transition: `opacity 0.75s cubic-bezier(.22,1,.36,1) ${delay}s, transform 0.75s cubic-bezier(.22,1,.36,1) ${delay}s`,
-        ...(stretch
-          ? { display: "flex", flexDirection: "column", alignSelf: "stretch", minHeight: 0, minWidth: 0, width: "100%", maxWidth: "100%", height: "100%", boxSizing: "border-box" }
-          : {}),
-        ...(styleProp || {}),
-      }}
-    >
-      {children}
+    <div ref={ref} style={outerStyle}>
+      <div style={innerStyle}>{children}</div>
     </div>
   );
 }
@@ -229,7 +263,7 @@ function Counter({ target, suffix = "", duration = 1600 }) {
   const numericTarget = typeof target === "number" ? target : 0;
   const [val, setVal] = useState(0);
   const ref = useRef();
-  const v = useInView(ref, 0.4);
+  const v = useInView(ref, { threshold: 0, rootMargin: "0px 0px 48px 0px" });
   const useDecimals = !Number.isInteger(numericTarget);
 
   useEffect(() => {
@@ -329,14 +363,7 @@ function TestimonialCard({ t, delay, dark, T, cardPadding, isMobile }) {
   const [hov, setHov] = useState(false);
   const fillRow = !isMobile;
   return (
-    <Reveal
-      delay={delay}
-      style={{
-        minWidth: 0,
-        width: "100%",
-        ...(fillRow ? { height: "100%", display: "flex", flexDirection: "column" } : {}),
-      }}
-    >
+    <Reveal delay={delay} stretch={fillRow} style={{ minWidth: 0, width: "100%" }}>
       <div
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
@@ -891,6 +918,9 @@ export default function Portfolio() {
   const isMobile = useMediaQuery("(max-width: 767px)");
   const sectionPad = isMobile ? "1.25rem" : "2.5rem";
   const cardPad = isMobile ? CARD_LAYOUT.padMob : CARD_LAYOUT.padDesk;
+  /** One observer for the whole stats grid so every column (incl. tall “6+ Industries”) reveals together. */
+  const trustStatsGridRef = useRef(null);
+  const trustStatsVisible = useInView(trustStatsGridRef, { threshold: 0, rootMargin: "0px 0px 25% 0px" });
 
   useEffect(() => {
     if (!isMobile) setNavOpen(false);
@@ -1167,6 +1197,7 @@ export default function Portfolio() {
       {/* ── TRUST BAR ── */}
       <section style={{ borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, padding: `3.75rem ${sectionPad}`, background: T.bg2 }}>
         <div
+          ref={trustStatsGridRef}
           style={{
             maxWidth: "1280px",
             margin: "0 auto",
@@ -1176,8 +1207,17 @@ export default function Portfolio() {
           }}
         >
           {STATS.map((s, i) => (
-            <Reveal key={i} delay={i * 0.07}>
-              <div style={{ textAlign: "center", minWidth: 0, maxWidth: "100%" }}>
+            <div key={s.label} style={{ minWidth: 0, maxWidth: "100%" }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  minWidth: 0,
+                  maxWidth: "100%",
+                  opacity: trustStatsVisible ? 1 : 0,
+                  transform: trustStatsVisible ? "none" : "translateY(28px)",
+                  transition: `opacity 0.75s cubic-bezier(.22,1,.36,1) ${i * 0.07}s, transform 0.75s cubic-bezier(.22,1,.36,1) ${i * 0.07}s`,
+                }}
+              >
                 <div
                   style={{
                     fontSize: isMobile ? "clamp(2rem, 7vw, 2.85rem)" : "clamp(2.6rem,4.5vw,3.4rem)",
@@ -1213,7 +1253,7 @@ export default function Portfolio() {
                   {s.label}
                 </p>
               </div>
-            </Reveal>
+            </div>
           ))}
         </div>
       </section>
@@ -1340,15 +1380,7 @@ export default function Portfolio() {
             }}
           >
             {SKILLS_CATEGORIES.map((c, i) => (
-              <Reveal
-                key={c.label}
-                delay={0.04 + i * 0.04}
-                style={{
-                  minWidth: 0,
-                  width: "100%",
-                  ...(!isMobile ? { height: "100%", display: "flex", flexDirection: "column" } : {}),
-                }}
-              >
+              <Reveal key={c.label} delay={0.04 + i * 0.04} stretch={!isMobile} style={{ minWidth: 0, width: "100%" }}>
                 <SkillsCategoryCard c={c} dark={dark} T={T} cardPad={cardPad} isMobile={isMobile} />
               </Reveal>
             ))}
