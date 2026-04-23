@@ -692,7 +692,7 @@ function HeroCard({ dark, fullWidth }) {
         <p style={{ fontSize: fullWidth ? "12px" : "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 5px" }}>Senior Product Designer</p>
         <p style={{ fontSize: fullWidth ? "clamp(1.15rem,4.5vw,1.375rem)" : "22px", fontWeight: 900, color: T ? "#f1f5f9" : "#0f172a", letterSpacing: "-0.035em", margin: "0 0 1.25rem", lineHeight: 1.15 }}>Himanshu Grover</p>
         <div style={{ height: "1px", background: T ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)", margin: "0 0 1rem" }} />
-        {[["6.8+ yrs", "Product Design"], ["30+ Products & Features Shipped to Production"], ["5K+ users", "Impacted globally"]].map(([v, l]) => (
+        {[["6.8+ yrs", "Product Design"], ["30+ Products & Features Shipped to Production"], ["Thousands of users impacted globally"]].map(([v, l]) => (
           <div key={v} style={{ display: "flex", justifyContent: l ? "space-between" : "flex-start", alignItems: fullWidth ? "flex-start" : "center", flexWrap: "wrap", gap: fullWidth ? "6px" : "4px", padding: "8px 0", borderBottom: `1px solid ${T ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
             <span style={{ fontSize: fullWidth ? "13px" : "14px", fontWeight: 700, color: T ? "#e2e8f0" : "#1e293b", letterSpacing: "-0.01em", lineHeight: 1.35 }}>{v}</span>
             {l ? <span style={{ fontSize: "12px", color: T ? "#64748b" : "#94a3b8", textAlign: fullWidth ? "left" : "right" }}>{l}</span> : null}
@@ -815,6 +815,67 @@ function CaseCard({ cs, dark, surface, border, text, muted, onClick, compactTag 
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+const SKILLS_CARD_ACCENT = "#6366f1";
+
+function SkillsCategoryCard({ c, dark, T, cardPad, isMobile }) {
+  const [hov, setHov] = useState(false);
+  const baseShadow = dark ? "0 8px 28px rgba(0,0,0,0.16)" : "0 2px 16px rgba(0,0,0,0.04)";
+  const hoverShadow = dark
+    ? `0 24px 56px rgba(0,0,0,0.45), 0 0 0 1px ${SKILLS_CARD_ACCENT}30, 0 0 40px ${SKILLS_CARD_ACCENT}14`
+    : `0 20px 44px rgba(15,23,42,0.1), 0 10px 28px rgba(99,102,241,0.12), 0 0 0 1px ${SKILLS_CARD_ACCENT}22`;
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: hov && !dark ? "#fafbff" : T.surface,
+        border: `1px solid ${hov ? `${SKILLS_CARD_ACCENT}40` : T.border}`,
+        borderRadius: CARD_LAYOUT.radius,
+        padding: cardPad,
+        minHeight: 0,
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box",
+        boxShadow: hov ? hoverShadow : baseShadow,
+        transition: "transform 0.38s cubic-bezier(.22,1,.36,1), box-shadow 0.38s cubic-bezier(.22,1,.36,1), border-color 0.32s ease, background 0.32s ease",
+        transform: hov ? "translateY(-7px)" : "none",
+        ...(!isMobile ? { flex: 1, height: "100%", display: "flex", flexDirection: "column" } : {}),
+      }}
+    >
+      <p style={{ fontSize: isMobile ? "11px" : "12px", fontWeight: 800, letterSpacing: "0.1em", color: SKILLS_CARD_ACCENT, textTransform: "uppercase", margin: "0 0 0.5rem", flexShrink: 0 }}>{c.label}</p>
+      <p style={{ fontSize: isMobile ? "14px" : "15px", color: T.textB, margin: 0, lineHeight: isMobile ? 1.68 : 1.72, ...(!isMobile ? { flex: 1, minHeight: 0 } : {}) }}>{c.line}</p>
+    </div>
+  );
+}
+
+function DesignPrincipleCard({ p, dark, T, cardPad }) {
+  const [hov, setHov] = useState(false);
+  const baseShadow = dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 4px 24px rgba(0,0,0,0.04)";
+  const hoverShadow = dark
+    ? `0 24px 56px rgba(0,0,0,0.45), 0 0 0 1px ${SKILLS_CARD_ACCENT}30, 0 0 40px ${SKILLS_CARD_ACCENT}14`
+    : `0 20px 44px rgba(15,23,42,0.1), 0 10px 28px rgba(99,102,241,0.12), 0 0 0 1px ${SKILLS_CARD_ACCENT}22`;
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: hov && !dark ? "#fafbff" : T.surface,
+        border: `1px solid ${hov ? `${SKILLS_CARD_ACCENT}40` : T.border}`,
+        borderRadius: CARD_LAYOUT.radius,
+        padding: cardPad,
+        boxSizing: "border-box",
+        boxShadow: hov ? hoverShadow : baseShadow,
+        transition: "transform 0.38s cubic-bezier(.22,1,.36,1), box-shadow 0.38s cubic-bezier(.22,1,.36,1), border-color 0.32s ease, background 0.32s ease",
+        transform: hov ? "translateY(-7px)" : "none",
+      }}
+    >
+      <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.12em", color: SKILLS_CARD_ACCENT, textTransform: "uppercase", margin: "0 0 0.5rem" }}>Principle {p.n}</p>
+      <p style={{ fontSize: "1.1rem", fontWeight: 800, color: T.text, margin: "0 0 0.75rem", letterSpacing: "-0.02em", lineHeight: 1.35 }}>{p.title}</p>
+      <p style={{ fontSize: "16px", color: T.body, margin: 0, lineHeight: 1.78 }}>{p.body}</p>
     </div>
   );
 }
@@ -1185,19 +1246,7 @@ export default function Portfolio() {
         <div style={{ display: "flex", flexDirection: "column", gap: CARD_LAYOUT.stackGap }}>
           {DESIGN_PRINCIPLES.map((p, i) => (
             <Reveal key={p.n} delay={0.04 + i * 0.05}>
-              <div
-                style={{
-                  background: T.surface,
-                  border: `1px solid ${T.border}`,
-                  borderRadius: CARD_LAYOUT.radius,
-                  padding: cardPad,
-                  boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 4px 24px rgba(0,0,0,0.04)",
-                }}
-              >
-                <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.5rem" }}>Principle {p.n}</p>
-                <p style={{ fontSize: "1.1rem", fontWeight: 800, color: T.text, margin: "0 0 0.75rem", letterSpacing: "-0.02em", lineHeight: 1.35 }}>{p.title}</p>
-                <p style={{ fontSize: "16px", color: T.body, margin: 0, lineHeight: 1.78 }}>{p.body}</p>
-              </div>
+              <DesignPrincipleCard p={p} dark={dark} T={T} cardPad={cardPad} />
             </Reveal>
           ))}
         </div>
@@ -1300,23 +1349,7 @@ export default function Portfolio() {
                   ...(!isMobile ? { height: "100%", display: "flex", flexDirection: "column" } : {}),
                 }}
               >
-                <div
-                  style={{
-                    background: T.surface,
-                    border: `1px solid ${T.border}`,
-                    borderRadius: CARD_LAYOUT.radius,
-                    padding: cardPad,
-                    minHeight: 0,
-                    width: "100%",
-                    maxWidth: "100%",
-                    boxSizing: "border-box",
-                    boxShadow: dark ? "0 8px 28px rgba(0,0,0,0.16)" : "0 2px 16px rgba(0,0,0,0.04)",
-                    ...(!isMobile ? { flex: 1, height: "100%", display: "flex", flexDirection: "column" } : {}),
-                  }}
-                >
-                  <p style={{ fontSize: isMobile ? "11px" : "12px", fontWeight: 800, letterSpacing: "0.1em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.5rem", flexShrink: 0 }}>{c.label}</p>
-                  <p style={{ fontSize: isMobile ? "14px" : "15px", color: T.textB, margin: 0, lineHeight: isMobile ? 1.68 : 1.72, ...(!isMobile ? { flex: 1, minHeight: 0 } : {}) }}>{c.line}</p>
-                </div>
+                <SkillsCategoryCard c={c} dark={dark} T={T} cardPad={cardPad} isMobile={isMobile} />
               </Reveal>
             ))}
           </div>
