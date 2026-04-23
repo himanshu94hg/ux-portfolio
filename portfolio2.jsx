@@ -165,7 +165,31 @@ const DESIGN_PRINCIPLES = [
   },
 ];
 
+/** Shared card rhythm: same corner radius, padding, and grid gaps site-wide. */
+const CARD_LAYOUT = {
+  radius: "20px",
+  padDesk: "1.75rem",
+  padMob: "1.25rem",
+  gap: "1.25rem",
+  stackGap: "1.25rem",
+  inset: "1rem",
+};
+
 /* ─── HOOKS ───────────────────────────────────────────────── */
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+  );
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    const on = () => setMatches(m.matches);
+    on();
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, [query]);
+  return matches;
+}
+
 function useInView(ref, threshold = 0.12) {
   const [v, setV] = useState(false);
   useEffect(() => {
@@ -177,7 +201,7 @@ function useInView(ref, threshold = 0.12) {
 }
 
 /* ─── PRIMITIVES ──────────────────────────────────────────── */
-function Reveal({ children, delay = 0, y = 28, stretch = false }) {
+function Reveal({ children, delay = 0, y = 28, stretch = false, style: styleProp }) {
   const ref = useRef(); const v = useInView(ref);
   return (
     <div
@@ -189,6 +213,7 @@ function Reveal({ children, delay = 0, y = 28, stretch = false }) {
         ...(stretch
           ? { display: "flex", flexDirection: "column", alignSelf: "stretch", minHeight: 0, minWidth: 0, width: "100%", maxWidth: "100%", height: "100%", boxSizing: "border-box" }
           : {}),
+        ...(styleProp || {}),
       }}
     >
       {children}
@@ -239,17 +264,47 @@ function Counter({ target, suffix = "", duration = 1600 }) {
   return <span ref={ref}>{display}{suffix}</span>;
 }
 
-function Tag({ children, color, bg }) {
-  return <span style={{ display: "inline-flex", alignItems: "center", fontSize: "11px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: color || "#818cf8", background: bg || "rgba(99,102,241,0.1)", padding: "4px 12px", borderRadius: "100px", border: `1px solid ${color ? color + "40" : "rgba(99,102,241,0.28)"}`, boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset" }}>{children}</span>;
+function Tag({ children, color, bg, compact }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        fontSize: compact ? "12px" : "11px",
+        fontWeight: 700,
+        letterSpacing: compact ? "0.08em" : "0.1em",
+        textTransform: "uppercase",
+        color: color || "#818cf8",
+        background: bg || "rgba(99,102,241,0.1)",
+        padding: compact ? "4px 10px" : "4px 12px",
+        borderRadius: "100px",
+        border: `1px solid ${color ? color + "40" : "rgba(99,102,241,0.28)"}`,
+        boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset",
+        ...(compact
+          ? {
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              whiteSpace: "normal",
+              flexWrap: "wrap",
+              justifyContent: "flex-start",
+              textAlign: "left",
+              lineHeight: 1.35,
+            }
+          : {}),
+      }}
+    >
+      {children}
+    </span>
+  );
 }
 
-function Btn({ children, onClick, href, target, rel, variant = "ghost", dark }) {
+function Btn({ children, onClick, href, target, rel, variant = "ghost", dark, style: styleProp }) {
   const variants = {
     primary: { background: "linear-gradient(135deg,#6366f1 0%,#818cf8 100%)", border: "none", color: "#fff", boxShadow: "0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15)", padding: "14px 28px" },
     ghost: { background: "transparent", border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`, color: dark ? "#e2e8f0" : "#374151", boxShadow: "none", padding: "13px 24px" },
   };
   const base = { display: "inline-flex", alignItems: "center", gap: "7px", borderRadius: "100px", fontSize: "15px", fontWeight: 600, cursor: "pointer", transition: "transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s cubic-bezier(.22,1,.36,1), filter 0.2s ease, background 0.2s, border-color 0.2s", textDecoration: "none", fontFamily: "inherit", letterSpacing: "-0.01em" };
-  const s = { ...base, ...variants[variant] };
+  const s = { ...base, ...variants[variant], ...(styleProp || {}) };
   const he = (el, on) => {
     if (variant === "primary") { el.style.transform = on ? "translateY(-2px) scale(1.02)" : "none"; el.style.boxShadow = on ? "0 16px 48px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset" : "0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15)"; el.style.filter = on ? "brightness(1.06) saturate(1.05)" : "none"; }
     else { el.style.transform = on ? "translateY(-1px)" : "none"; el.style.background = on ? (dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent"; el.style.borderColor = on ? (dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.16)") : (dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"); }
@@ -267,29 +322,32 @@ function Eyebrow({ label, center }) {
   );
 }
 
-function TestimonialCard({ t, delay, dark, T }) {
+function TestimonialCard({ t, delay, dark, T, cardPadding }) {
   const [hov, setHov] = useState(false);
   return (
-    <Reveal delay={delay}>
+    <Reveal delay={delay} style={{ minWidth: 0, width: "100%" }}>
       <div
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
           background: T.surface,
           border: `1px solid ${hov ? t.color + "4d" : T.border}`,
-          borderRadius: "24px",
-          padding: "2.25rem 2.15rem 1.75rem",
+          borderRadius: CARD_LAYOUT.radius,
+          padding: cardPadding,
           transition: "transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s, border-color 0.3s",
           transform: hov ? "translateY(-6px)" : "none",
           boxShadow: hov ? (dark ? "0 28px 76px rgba(0,0,0,0.48),0 0 0 1px " + t.color + "15" : "0 24px 70px rgba(0,0,0,0.1)") : "none",
           display: "flex",
           flexDirection: "column",
-          height: "100%",
+          minHeight: 0,
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         <div style={{ fontSize: "52px", lineHeight: 0.75, background: `linear-gradient(160deg,${t.color}aa,${t.color}22)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "Georgia,serif", marginBottom: "0.5rem", fontWeight: 700, userSelect: "none" }}>"</div>
-        <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.86, margin: "0 0 1.5rem", fontWeight: 400, letterSpacing: "0.01em", flex: 1 }}>{t.quote}</p>
-        <div style={{ paddingTop: "1.25rem", borderTop: `1px solid ${T.border}` }}>
+        <p style={{ color: T.bodyB, fontSize: "16px", lineHeight: 1.86, margin: `0 0 ${CARD_LAYOUT.stackGap}`, fontWeight: 400, letterSpacing: "0.01em", flex: "1 1 auto", minHeight: 0 }}>{t.quote}</p>
+        <div style={{ paddingTop: CARD_LAYOUT.stackGap, borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
             <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: t.color + "1a", border: `2px solid ${hov ? t.color + "55" : t.color + "33"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 800, color: t.color, flexShrink: 0, transition: "border-color 0.3s" }}>{t.initials}</div>
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -304,7 +362,7 @@ function TestimonialCard({ t, delay, dark, T }) {
             rel="noopener noreferrer"
             style={{
               display: "inline-block",
-              marginTop: "1.1rem",
+              marginTop: CARD_LAYOUT.stackGap,
               fontSize: "13px",
               fontWeight: 600,
               color: t.color,
@@ -324,18 +382,18 @@ function TestimonialCard({ t, delay, dark, T }) {
 
 const SW_IMG_H = 200;
 
-function SelectedWorkImageBlock({ item, T }) {
+function SelectedWorkImageBlock({ item, T, imageHeight = SW_IMG_H }) {
   if (item.images?.length) {
     return (
       <div
         style={{
-          margin: "0 0 1.1rem",
+          margin: `0 0 ${CARD_LAYOUT.gap}`,
           borderRadius: "14px",
           overflow: "hidden",
           border: `1px solid ${T.border}`,
           background: "rgba(0,0,0,0.2)",
           flexShrink: 0,
-          height: SW_IMG_H,
+          height: imageHeight,
           width: "100%",
           minWidth: 0,
           maxWidth: "100%",
@@ -370,13 +428,13 @@ function SelectedWorkImageBlock({ item, T }) {
     return (
       <div
         style={{
-          margin: "0 0 1.1rem",
+          margin: `0 0 ${CARD_LAYOUT.gap}`,
           borderRadius: "14px",
           overflow: "hidden",
           border: `1px solid ${T.border}`,
           background: "rgba(0,0,0,0.15)",
           flexShrink: 0,
-          height: SW_IMG_H,
+          height: imageHeight,
           width: "100%",
           minWidth: 0,
           maxWidth: "100%",
@@ -499,7 +557,7 @@ function SelectedWorkModal({ item, onClose, T, dark }) {
   );
 }
 
-function SelectedWorkCard({ item, delay, dark, T, onModalOpen }) {
+function SelectedWorkCard({ item, delay, dark, T, onModalOpen, imageHeight, cardPadding }) {
   const [hov, setHov] = useState(false);
   const hasModal = item.modalImages?.length > 0 && typeof onModalOpen === "function";
   return (
@@ -523,8 +581,8 @@ function SelectedWorkCard({ item, delay, dark, T, onModalOpen }) {
         style={{
           background: hov ? T.surface : "rgba(255,255,255,0.02)",
           border: `1px solid ${hov ? item.color + "4d" : T.border}`,
-          borderRadius: "20px",
-          padding: "1.85rem 1.6rem 1.75rem",
+          borderRadius: CARD_LAYOUT.radius,
+          padding: cardPadding,
           transition: "all 0.28s cubic-bezier(.22,1,.36,1)",
           transform: hov ? "translateY(-4px)" : "none",
           boxShadow: hov ? (dark ? "0 20px 56px rgba(0,0,0,0.35)" : "0 16px 48px rgba(0,0,0,0.08)") : "none",
@@ -541,21 +599,21 @@ function SelectedWorkCard({ item, delay, dark, T, onModalOpen }) {
           overflow: "hidden",
         }}
       >
-        <SelectedWorkImageBlock item={item} T={T} />
-        <h3 style={{ fontWeight: 800, fontSize: "1.3rem", color: T.text, margin: "0 0 0.4rem", letterSpacing: "-0.03em", lineHeight: 1.2 }}>{item.title}</h3>
+        <SelectedWorkImageBlock item={item} T={T} imageHeight={imageHeight} />
+        <h3 style={{ fontWeight: 800, fontSize: "1.3rem", color: T.text, margin: "0 0 0.5rem", letterSpacing: "-0.03em", lineHeight: 1.2 }}>{item.title}</h3>
         <p
           style={{
             fontSize: "12px",
             fontWeight: 700,
             letterSpacing: "0.04em",
             color: item.color,
-            margin: "0 0 1rem",
+            margin: `0 0 ${CARD_LAYOUT.stackGap}`,
             lineHeight: 1.5,
           }}
         >
           {item.tagline}
         </p>
-        <p style={{ fontSize: "15px", color: T.body, margin: "0 0 1.35rem", lineHeight: 1.75, flex: 1, minHeight: 0, overflow: "auto" }}>{item.description}</p>
+        <p style={{ fontSize: "15px", color: T.body, margin: `0 0 ${CARD_LAYOUT.gap}`, lineHeight: 1.75, flex: 1, minHeight: 0, overflow: "auto" }}>{item.description}</p>
         {item.href ? (
           <div>
             <a
@@ -600,26 +658,37 @@ function ScrollBar() {
 }
 
 /* ─── HERO CARD ───────────────────────────────────────────── */
-function HeroCard({ dark }) {
+function HeroCard({ dark, fullWidth }) {
   const T = dark;
   const [float, setFloat] = useState(false);
   return (
-    <div style={{ position: "relative", width: "300px", flexShrink: 0 }} onMouseEnter={() => setFloat(true)} onMouseLeave={() => setFloat(false)}>
-      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "380px", height: "380px", background: "radial-gradient(circle,rgba(99,102,241,0.24) 0%,rgba(99,102,241,0.06) 45%,transparent 70%)", pointerEvents: "none", opacity: float ? 1 : 0.85, transition: "opacity 0.45s cubic-bezier(.22,1,.36,1)" }} />
-      <div style={{ position: "relative", background: T ? "rgba(13,16,28,0.92)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)", border: `1px solid ${T ? "rgba(255,255,255,0.1)" : "rgba(99,102,241,0.2)"}`, borderRadius: "28px", padding: "1.85rem 1.75rem 1.55rem", boxShadow: float ? (T ? "0 44px 100px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(255,255,255,0.06)" : "0 44px 100px rgba(0,0,0,0.14), 0 0 40px rgba(99,102,241,0.1)") : (T ? "0 36px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)" : "0 36px 90px rgba(0,0,0,0.12)"), transform: float ? "translateY(-6px)" : "none", transition: "transform 0.45s cubic-bezier(.22,1,.36,1), box-shadow 0.45s cubic-bezier(.22,1,.36,1)" }}>
-        <div style={{ width: "68px", height: "68px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "30px", marginBottom: "1.25rem", boxShadow: "0 8px 28px rgba(99,102,241,0.45)" }}>🎨</div>
-        <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 5px" }}>Senior Product Designer</p>
-        <p style={{ fontSize: "22px", fontWeight: 900, color: T ? "#f1f5f9" : "#0f172a", letterSpacing: "-0.035em", margin: "0 0 1.25rem", lineHeight: 1.15 }}>Himanshu Grover</p>
+    <div
+      style={{
+        position: "relative",
+        width: fullWidth ? "100%" : "300px",
+        maxWidth: fullWidth ? "100%" : undefined,
+        flexShrink: fullWidth ? 1 : 0,
+        alignSelf: fullWidth ? "stretch" : undefined,
+        boxSizing: "border-box",
+      }}
+      onMouseEnter={() => setFloat(true)}
+      onMouseLeave={() => setFloat(false)}
+    >
+      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: fullWidth ? "min(380px, 100vw)" : "380px", height: fullWidth ? "min(380px, 100vw)" : "380px", background: "radial-gradient(circle,rgba(99,102,241,0.24) 0%,rgba(99,102,241,0.06) 45%,transparent 70%)", pointerEvents: "none", opacity: float ? 1 : 0.85, transition: "opacity 0.45s cubic-bezier(.22,1,.36,1)" }} />
+      <div style={{ position: "relative", background: T ? "rgba(13,16,28,0.92)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)", border: `1px solid ${T ? "rgba(255,255,255,0.1)" : "rgba(99,102,241,0.2)"}`, borderRadius: "28px", padding: fullWidth ? CARD_LAYOUT.padMob : CARD_LAYOUT.padDesk, boxShadow: float ? (T ? "0 44px 100px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(255,255,255,0.06)" : "0 44px 100px rgba(0,0,0,0.14), 0 0 40px rgba(99,102,241,0.1)") : (T ? "0 36px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)" : "0 36px 90px rgba(0,0,0,0.12)"), transform: float ? "translateY(-6px)" : "none", transition: "transform 0.45s cubic-bezier(.22,1,.36,1), box-shadow 0.45s cubic-bezier(.22,1,.36,1)" }}>
+        <div style={{ width: fullWidth ? "60px" : "68px", height: fullWidth ? "60px" : "68px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: fullWidth ? "26px" : "30px", marginBottom: "1.25rem", boxShadow: "0 8px 28px rgba(99,102,241,0.45)" }}>🎨</div>
+        <p style={{ fontSize: fullWidth ? "12px" : "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 5px" }}>Senior Product Designer</p>
+        <p style={{ fontSize: fullWidth ? "clamp(1.15rem,4.5vw,1.375rem)" : "22px", fontWeight: 900, color: T ? "#f1f5f9" : "#0f172a", letterSpacing: "-0.035em", margin: "0 0 1.25rem", lineHeight: 1.15 }}>Himanshu Grover</p>
         <div style={{ height: "1px", background: T ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)", margin: "0 0 1rem" }} />
         {[["6.8+ yrs", "Product Design"], ["30+ Products & Features Shipped to Production"], ["5K+ users", "Impacted globally"]].map(([v, l]) => (
-          <div key={v} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${T ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: T ? "#e2e8f0" : "#1e293b", letterSpacing: "-0.01em" }}>{v}</span>
-            <span style={{ fontSize: "12px", color: T ? "#64748b" : "#94a3b8" }}>{l}</span>
+          <div key={v} style={{ display: "flex", justifyContent: l ? "space-between" : "flex-start", alignItems: fullWidth ? "flex-start" : "center", flexWrap: "wrap", gap: fullWidth ? "6px" : "4px", padding: "8px 0", borderBottom: `1px solid ${T ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
+            <span style={{ fontSize: fullWidth ? "13px" : "14px", fontWeight: 700, color: T ? "#e2e8f0" : "#1e293b", letterSpacing: "-0.01em", lineHeight: 1.35 }}>{v}</span>
+            {l ? <span style={{ fontSize: "12px", color: T ? "#64748b" : "#94a3b8", textAlign: fullWidth ? "left" : "right" }}>{l}</span> : null}
           </div>
         ))}
         <div style={{ marginTop: "1.1rem", display: "flex", alignItems: "center", gap: "8px" }}>
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 10px #10b981", flexShrink: 0 }} />
-          <span style={{ fontSize: "13px", color: "#10b981", fontWeight: 600 }}>Available for opportunities</span>
+          <span style={{ fontSize: fullWidth ? "14px" : "13px", color: "#10b981", fontWeight: 600, lineHeight: 1.35 }}>Available for opportunities</span>
         </div>
       </div>
     </div>
@@ -627,28 +696,111 @@ function HeroCard({ dark }) {
 }
 
 /* ─── CASE CARD ───────────────────────────────────────────── */
-function CaseCard({ cs, dark, surface, border, text, muted, onClick }) {
+function CaseCard({ cs, dark, surface, border, text, muted, onClick, compactTag }) {
   const [hov, setHov] = useState(false);
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={onClick}
-      style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, background: hov ? (dark ? "rgba(12,14,24,0.98)" : "#fff") : surface, border: `1px solid ${hov ? cs.color + "5c" : border}`, borderRadius: "22px", overflow: "hidden", cursor: "pointer", transition: "transform 0.4s cubic-bezier(.22,1,.36,1), box-shadow 0.4s cubic-bezier(.22,1,.36,1), border-color 0.35s, background 0.35s", transform: hov ? "translateY(-9px)" : "none", boxShadow: hov ? (dark ? `0 36px 88px rgba(0,0,0,0.58),0 0 0 1px ${cs.color}28,0 0 48px ${cs.glow}` : `0 28px 64px rgba(0,0,0,0.12),0 0 0 1px ${cs.color}25`) : "none" }}>
+      style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, background: hov ? (dark ? "rgba(12,14,24,0.98)" : "#fff") : surface, border: `1px solid ${hov ? cs.color + "5c" : border}`, borderRadius: CARD_LAYOUT.radius, overflow: "hidden", cursor: "pointer", transition: "transform 0.4s cubic-bezier(.22,1,.36,1), box-shadow 0.4s cubic-bezier(.22,1,.36,1), border-color 0.35s, background 0.35s", transform: hov ? "translateY(-9px)" : "none", boxShadow: hov ? (dark ? `0 36px 88px rgba(0,0,0,0.58),0 0 0 1px ${cs.color}28,0 0 48px ${cs.glow}` : `0 28px 64px rgba(0,0,0,0.12),0 0 0 1px ${cs.color}25`) : "none" }}>
       {/* Thumbnail */}
       <div style={{ height: "200px", flexShrink: 0, background: `linear-gradient(135deg,${cs.color}22 0%,${cs.color}08 100%)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", borderBottom: `1px solid ${cs.color}18`, overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(circle,${cs.color}18 1px,transparent 1px)`, backgroundSize: "28px 28px", opacity: hov ? 1 : 0.5, transition: "opacity 0.45s cubic-bezier(.22,1,.36,1)" }} />
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: hov ? "3px" : "0px", background: `linear-gradient(90deg,transparent,${cs.accent},${cs.color},transparent)`, opacity: 0.85, transition: "height 0.35s cubic-bezier(.22,1,.36,1)" }} />
         <div style={{ fontSize: "60px", position: "relative", zIndex: 1, filter: `drop-shadow(0 8px 24px ${cs.glow})`, transform: hov ? "scale(1.04)" : "none", transition: "transform 0.4s cubic-bezier(.22,1,.36,1)" }}>{cs.icon}</div>
-        <div style={{ position: "absolute", top: "1rem", left: "1rem" }}><Tag color={cs.accent} bg={cs.color + "18"}>{cs.tag}</Tag></div>
-        <div style={{ position: "absolute", top: "1rem", right: "1rem", background: dark ? "rgba(8,10,18,0.75)" : "rgba(255,255,255,0.9)", backdropFilter: "blur(10px)", border: `1px solid ${cs.color}40`, borderRadius: "100px", padding: "5px 13px", boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }}>
-          <span style={{ fontSize: "12px", fontWeight: 700, color: cs.accent, letterSpacing: "0.02em" }}>{cs.metric}</span>
-        </div>
+        {compactTag ? (
+          <div
+            style={{
+              position: "absolute",
+              top: CARD_LAYOUT.inset,
+              left: CARD_LAYOUT.inset,
+              right: CARD_LAYOUT.inset,
+              zIndex: 2,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "0.5rem",
+              minWidth: 0,
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{ maxWidth: "100%", minWidth: 0, pointerEvents: "auto" }}>
+              <Tag color={cs.accent} bg={cs.color + "18"} compact={compactTag}>{cs.tag}</Tag>
+            </div>
+            <div
+              style={{
+                maxWidth: "100%",
+                minWidth: 0,
+                boxSizing: "border-box",
+                background: dark ? "rgba(8,10,18,0.75)" : "rgba(255,255,255,0.9)",
+                backdropFilter: "blur(10px)",
+                border: `1px solid ${cs.color}40`,
+                borderRadius: "100px",
+                padding: "5px 13px",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                pointerEvents: "auto",
+              }}
+            >
+              <span style={{ fontSize: "12px", fontWeight: 700, color: cs.accent, letterSpacing: "0.02em", lineHeight: 1.35, display: "block", overflowWrap: "break-word", wordBreak: "break-word" }}>{cs.metric}</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div style={{ position: "absolute", top: CARD_LAYOUT.inset, left: CARD_LAYOUT.inset, zIndex: 2 }}>
+              <Tag color={cs.accent} bg={cs.color + "18"} compact={compactTag}>{cs.tag}</Tag>
+            </div>
+            <div style={{ position: "absolute", top: CARD_LAYOUT.inset, right: CARD_LAYOUT.inset, zIndex: 2, background: dark ? "rgba(8,10,18,0.75)" : "rgba(255,255,255,0.9)", backdropFilter: "blur(10px)", border: `1px solid ${cs.color}40`, borderRadius: "100px", padding: "5px 13px", boxShadow: "0 2px 12px rgba(0,0,0,0.2)" }}>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: cs.accent, letterSpacing: "0.02em" }}>{cs.metric}</span>
+            </div>
+          </>
+        )}
       </div>
       {/* Body */}
-      <div style={{ padding: "1.8rem 1.85rem 2rem", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <h3 style={{ fontWeight: 800, fontSize: "20px", color: text, margin: "0 0 0.55rem", lineHeight: 1.25, letterSpacing: "-0.028em" }}>{cs.title}</h3>
+      <div style={{ padding: compactTag ? CARD_LAYOUT.padMob : CARD_LAYOUT.padDesk, flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <h3 style={{ fontWeight: 800, fontSize: "20px", color: text, margin: "0 0 0.5rem", lineHeight: 1.25, letterSpacing: "-0.028em" }}>{cs.title}</h3>
         <p style={{ color: muted, fontSize: "15px", lineHeight: 1.78, margin: 0, fontWeight: 400, letterSpacing: "0.01em" }}>{cs.tagline}</p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginTop: "auto", paddingTop: "1.4rem" }}>
-          <span style={{ fontSize: "14px", color: cs.accent, fontWeight: 700, letterSpacing: "0.02em", display: "inline-flex", alignItems: "center", gap: "6px" }}>View Case Study <span style={{ display: "inline-block", transform: hov ? "translateX(4px)" : "none", transition: "transform 0.3s cubic-bezier(.22,1,.36,1)", filter: hov ? "brightness(1.1)" : "none" }}>→</span></span>
-          <span style={{ fontSize: "12px", color: dark ? "#475569" : "#94a3b8" }}>{cs.users}</span>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: compactTag ? "column" : "row",
+            alignItems: compactTag ? "stretch" : "center",
+            justifyContent: compactTag ? "flex-start" : "space-between",
+            gap: compactTag ? "0.65rem" : "0.75rem",
+            marginTop: "auto",
+            paddingTop: CARD_LAYOUT.stackGap,
+            minWidth: 0,
+          }}
+        >
+          <span
+            style={{
+              fontSize: "14px",
+              color: cs.accent,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              flexShrink: 0,
+              whiteSpace: compactTag ? "nowrap" : undefined,
+            }}
+          >
+            View Case Study{" "}
+            <span style={{ display: "inline-block", transform: hov ? "translateX(4px)" : "none", transition: "transform 0.3s cubic-bezier(.22,1,.36,1)", filter: hov ? "brightness(1.1)" : "none" }}>→</span>
+          </span>
+          <span
+            style={{
+              fontSize: "12px",
+              color: dark ? "#475569" : "#94a3b8",
+              ...(compactTag
+                ? {
+                    lineHeight: 1.55,
+                    overflowWrap: "break-word",
+                    wordBreak: "break-word",
+                    minWidth: 0,
+                  }
+                : {}),
+            }}
+          >
+            {cs.users}
+          </span>
         </div>
       </div>
     </div>
@@ -662,6 +814,33 @@ export default function Portfolio() {
   const [shrink, setShrink] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [workModalItem, setWorkModalItem] = useState(null);
+  const [navOpen, setNavOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const sectionPad = isMobile ? "1.25rem" : "2.5rem";
+  const cardPad = isMobile ? CARD_LAYOUT.padMob : CARD_LAYOUT.padDesk;
+
+  useEffect(() => {
+    if (!isMobile) setNavOpen(false);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!navOpen || !isMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [navOpen, isMobile]);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = e => {
+      if (e.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
+
   useEffect(() => {
     setMounted(true);
     const fn = () => setShrink(window.scrollY > 50);
@@ -697,41 +876,190 @@ export default function Portfolio() {
   return (
     <div style={{ background: T.bg, color: T.text, fontFamily: "'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif", minHeight: "100vh", transition: "background 0.4s,color 0.4s", overflowX: "hidden" }}>
       <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet" />
+      <style>
+        {`
+          .portfolio-process-steps {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          @media (min-width: 640px) {
+            .portfolio-process-steps {
+              grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+          }
+        `}
+      </style>
       <ScrollBar />
 
       {/* ── NAV ── */}
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, padding: shrink ? "0.85rem 2.5rem" : "1.4rem 2.5rem", background: shrink ? (dark ? "rgba(7,9,15,0.9)" : "rgba(247,248,252,0.9)") : "transparent", backdropFilter: shrink ? "blur(24px)" : "none", borderBottom: shrink ? `1px solid ${T.border}` : "none", transition: "all 0.35s cubic-bezier(.22,1,.36,1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, padding: shrink ? `0.85rem ${sectionPad}` : `1.4rem ${sectionPad}`, background: shrink ? (dark ? "rgba(7,9,15,0.9)" : "rgba(247,248,252,0.9)") : "transparent", backdropFilter: shrink ? "blur(24px)" : "none", borderBottom: shrink ? `1px solid ${T.border}` : "none", transition: "all 0.35s cubic-bezier(.22,1,.36,1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontWeight: 900, fontSize: "19px", letterSpacing: "-0.05em", cursor: "pointer", color: T.text }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           <span style={{ color: "#6366f1" }}>H</span>G.
         </span>
-        <div style={{ display: "flex", gap: "2px", alignItems: "center" }}>
-          {NAV_LINKS.map(l => (
-            <button key={l} onClick={() => scrollTo(l.toLowerCase())} style={{ background: "none", border: "none", color: T.body, fontSize: "14px", fontWeight: 500, cursor: "pointer", padding: "7px 13px", borderRadius: "10px", transition: "all 0.18s", fontFamily: "inherit", letterSpacing: "-0.01em" }}
-              onMouseEnter={e => { e.target.style.color = T.text; e.target.style.background = T.subtle; }}
-              onMouseLeave={e => { e.target.style.color = T.body; e.target.style.background = "transparent"; }}>
-              {l}
+        <div style={{ display: "flex", gap: isMobile ? "6px" : "2px", alignItems: "center" }}>
+          {!isMobile &&
+            NAV_LINKS.map(l => (
+              <button key={l} onClick={() => scrollTo(l.toLowerCase())} style={{ background: "none", border: "none", color: T.body, fontSize: "14px", fontWeight: 500, cursor: "pointer", padding: "7px 13px", borderRadius: "10px", transition: "all 0.18s", fontFamily: "inherit", letterSpacing: "-0.01em" }}
+                onMouseEnter={e => { e.target.style.color = T.text; e.target.style.background = T.subtle; }}
+                onMouseLeave={e => { e.target.style.color = T.body; e.target.style.background = "transparent"; }}>
+                {l}
+              </button>
+            ))}
+          {isMobile && (
+            <button
+              type="button"
+              aria-expanded={navOpen}
+              aria-label={navOpen ? "Close menu" : "Open menu"}
+              onClick={() => setNavOpen(o => !o)}
+              style={{
+                background: T.subtle,
+                border: `1px solid ${T.border}`,
+                color: T.text,
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                cursor: "pointer",
+                fontSize: "18px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s",
+                fontFamily: "inherit",
+                lineHeight: 1,
+              }}
+            >
+              {navOpen ? "×" : "☰"}
             </button>
-          ))}
-          <button onClick={() => setDark(!dark)} style={{ marginLeft: "8px", background: T.subtle, border: `1px solid ${T.border}`, color: T.body, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+          )}
+          <button onClick={() => setDark(!dark)} style={{ marginLeft: isMobile ? "4px" : "8px", background: T.subtle, border: `1px solid ${T.border}`, color: T.body, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
             {dark ? "○" : "●"}
           </button>
         </div>
       </nav>
+      {isMobile && navOpen && (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setNavOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 190,
+              background: "rgba(0,0,0,0.45)",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              top: shrink ? "56px" : "68px",
+              left: 0,
+              right: 0,
+              zIndex: 195,
+              background: dark ? "rgba(7,9,15,0.98)" : "rgba(247,248,252,0.98)",
+              backdropFilter: "blur(16px)",
+              borderBottom: `1px solid ${T.border}`,
+              padding: "0.75rem 1rem 1rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+              boxShadow: dark ? "0 24px 48px rgba(0,0,0,0.45)" : "0 16px 40px rgba(0,0,0,0.08)",
+            }}
+          >
+            {NAV_LINKS.map(l => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => {
+                  scrollTo(l.toLowerCase());
+                  setNavOpen(false);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: T.text,
+                  fontSize: "16px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  padding: "12px 14px",
+                  borderRadius: "12px",
+                  textAlign: "left",
+                  fontFamily: "inherit",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* ── HERO ── */}
-      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "9.25rem 2.5rem 5.5rem", maxWidth: "1280px", margin: "0 auto", gap: "5.25rem", flexWrap: "wrap", position: "relative" }}>
+      <section
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
+          padding: isMobile ? `7.5rem ${sectionPad} 3.5rem` : `9.25rem ${sectionPad} 5.5rem`,
+          maxWidth: "1280px",
+          margin: "0 auto",
+          gap: isMobile ? "2.5rem" : "5.25rem",
+          flexWrap: "wrap",
+          position: "relative",
+        }}
+      >
         <div style={{ position: "absolute", top: "18%", left: "6%", width: "540px", height: "540px", background: "radial-gradient(circle,rgba(99,102,241,0.14) 0%,rgba(99,102,241,0.04) 38%,transparent 68%)", pointerEvents: "none", filter: "blur(56px)" }} />
         <div style={{ position: "absolute", bottom: "8%", right: "4%", width: "420px", height: "420px", background: "radial-gradient(circle,rgba(167,139,250,0.1) 0%,rgba(96,165,250,0.04) 40%,transparent 70%)", pointerEvents: "none", filter: "blur(64px)" }} />
 
         {/* Copy */}
-        <div style={{ flex: "1 1 460px", position: "relative", zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(40px)", transition: "opacity 1s cubic-bezier(.22,1,.36,1) 0.1s,transform 1s cubic-bezier(.22,1,.36,1) 0.1s" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: dark ? "rgba(99,102,241,0.1)" : "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.25)", borderRadius: "100px", padding: "6px 14px 6px 8px", marginBottom: "2.25rem" }}>
-            <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981" }} />
-            <span style={{ fontSize: "13px", color: dark ? "#a5b4fc" : "#4338ca", fontWeight: 600 }}>Available for senior roles &amp; remote work</span>
+        <div style={{ flex: isMobile ? "1 1 auto" : "1 1 460px", minWidth: 0, position: "relative", zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(40px)", transition: "opacity 1s cubic-bezier(.22,1,.36,1) 0.1s,transform 1s cubic-bezier(.22,1,.36,1) 0.1s" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: isMobile ? "flex-start" : "center",
+              gap: isMobile ? "10px" : "8px",
+              width: isMobile ? "100%" : "fit-content",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              background: dark ? "rgba(99,102,241,0.1)" : "rgba(99,102,241,0.07)",
+              border: "1px solid rgba(99,102,241,0.25)",
+              borderRadius: "100px",
+              padding: isMobile ? "11px 18px 11px 14px" : "6px 14px 6px 8px",
+              marginBottom: "2.25rem",
+            }}
+          >
+            <div
+              style={{
+                width: "7px",
+                height: "7px",
+                borderRadius: "50%",
+                background: "#10b981",
+                boxShadow: "0 0 8px #10b981",
+                flexShrink: 0,
+                ...(isMobile ? { marginTop: "0.32em" } : {}),
+              }}
+            />
+            <span
+              style={{
+                flex: isMobile ? "1" : undefined,
+                minWidth: 0,
+                fontSize: isMobile ? "clamp(13px, 3.6vw, 14px)" : "13px",
+                color: dark ? "#a5b4fc" : "#4338ca",
+                fontWeight: 600,
+                lineHeight: isMobile ? 1.5 : 1.35,
+                letterSpacing: isMobile ? "-0.02em" : undefined,
+              }}
+            >
+              Available for senior roles &amp; remote work
+            </span>
           </div>
 
-          <h1 style={{ fontSize: "clamp(3.5rem,8vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 0.15rem", color: T.text, textRendering: "geometricPrecision" }}>Himanshu</h1>
-          <h1 style={{ fontSize: "clamp(3.5rem,8vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 1.65rem", background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Grover.</h1>
+          <h1 style={{ fontSize: "clamp(2.4rem,6vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 0.15rem", color: T.text, textRendering: "geometricPrecision", overflowWrap: "anywhere", wordBreak: "break-word" }}>Himanshu</h1>
+          <h1 style={{ fontSize: "clamp(2.4rem,6vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 1.65rem", background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", overflowWrap: "anywhere", wordBreak: "break-word" }}>Grover.</h1>
 
           <p style={{ fontSize: "clamp(1.1rem,2.2vw,1.35rem)", fontWeight: 800, color: T.bodyB, letterSpacing: "-0.028em", margin: "0 0 1.15rem", lineHeight: 1.4 }}>
             Senior Product Designer · UI/UX · AI Products
@@ -740,30 +1068,67 @@ export default function Portfolio() {
             I design products people love and businesses grow with. 6.8+ years building SaaS tools, enterprise platforms, marketplaces, and AI-powered experiences — always with measurable outcomes.
           </p>
 
-          <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap", alignItems: "center" }}>
-            <Btn variant="primary" onClick={() => scrollTo("work")} dark={dark}>View Case Studies →</Btn>
-            <Btn variant="ghost" href="/Himanshu_Grover_Resume_PD.pdf" target="_blank" dark={dark}>Download Resume</Btn>
-            <Btn variant="ghost" href="mailto:himanshugrover2710@gmail.com" dark={dark}>Let's Talk</Btn>
+          <div style={{ display: "flex", gap: isMobile ? "0.65rem" : "0.8rem", flexWrap: "wrap", alignItems: "center" }}>
+            <Btn variant="primary" onClick={() => scrollTo("work")} dark={dark} style={isMobile ? { padding: "15px 22px", fontSize: "16px" } : undefined}>View Case Studies →</Btn>
+            <Btn variant="ghost" href="/Himanshu_Grover_Resume_PD.pdf" target="_blank" dark={dark} style={isMobile ? { padding: "14px 20px", fontSize: "16px" } : undefined}>Download Resume</Btn>
+            <Btn variant="ghost" href="mailto:himanshugrover2710@gmail.com" dark={dark} style={isMobile ? { padding: "14px 20px", fontSize: "16px" } : undefined}>Let's Talk</Btn>
           </div>
         </div>
 
         {/* Card */}
-        <div style={{ flex: "0 0 auto", zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(28px) scale(0.96)", transition: "opacity 1.1s cubic-bezier(.22,1,.36,1) 0.35s,transform 1.1s cubic-bezier(.22,1,.36,1) 0.35s" }}>
-          <HeroCard dark={dark} />
+        <div style={{ flex: isMobile ? "1 1 auto" : "0 0 auto", width: isMobile ? "100%" : undefined, minWidth: 0, zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? "none" : "translateY(28px) scale(0.96)", transition: "opacity 1.1s cubic-bezier(.22,1,.36,1) 0.35s,transform 1.1s cubic-bezier(.22,1,.36,1) 0.35s" }}>
+          <HeroCard dark={dark} fullWidth={isMobile} />
         </div>
       </section>
 
       {/* ── TRUST BAR ── */}
-      <section style={{ borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, padding: "3.75rem 2.5rem", background: T.bg2 }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "2.5rem" }}>
+      <section style={{ borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, padding: `3.75rem ${sectionPad}`, background: T.bg2 }}>
+        <div
+          style={{
+            maxWidth: "1280px",
+            margin: "0 auto",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(auto-fit,minmax(200px,1fr))",
+            gap: isMobile ? "2.35rem" : "2.5rem",
+          }}
+        >
           {STATS.map((s, i) => (
             <Reveal key={i} delay={i * 0.07}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "clamp(2.6rem,4.5vw,3.4rem)", fontWeight: 900, letterSpacing: "-0.045em", lineHeight: 1, background: "linear-gradient(135deg,#6366f1,#a78bfa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: "6px" }}>
+              <div style={{ textAlign: "center", minWidth: 0, maxWidth: "100%" }}>
+                <div
+                  style={{
+                    fontSize: isMobile ? "clamp(2rem, 7vw, 2.85rem)" : "clamp(2.6rem,4.5vw,3.4rem)",
+                    fontWeight: 900,
+                    letterSpacing: "-0.045em",
+                    lineHeight: isMobile ? 1.12 : 1,
+                    background: "linear-gradient(135deg,#6366f1,#a78bfa)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    marginBottom: "6px",
+                    overflowWrap: "break-word",
+                    wordBreak: "break-word",
+                    padding: isMobile ? "0 2px" : 0,
+                    boxSizing: "border-box",
+                  }}
+                >
                   <Counter target={s.value} suffix={s.suffix} />
-                  <span style={{ fontSize: "52%", fontWeight: 700, marginLeft: "4px" }}>{s.unit}</span>
+                  <span style={{ fontSize: "52%", fontWeight: 700, marginLeft: "4px", whiteSpace: "normal" }}>{s.unit}</span>
                 </div>
-                <p style={{ color: T.body, fontSize: "14px", fontWeight: 500, margin: 0 }}>{s.label}</p>
+                <p
+                  style={{
+                    color: T.body,
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    margin: 0,
+                    lineHeight: isMobile ? 1.65 : undefined,
+                    overflowWrap: "break-word",
+                    wordBreak: "break-word",
+                    padding: isMobile ? "0 2px" : 0,
+                    boxSizing: "border-box",
+                  }}
+                >
+                  {s.label}
+                </p>
               </div>
             </Reveal>
           ))}
@@ -771,23 +1136,23 @@ export default function Portfolio() {
       </section>
 
       {/* ── CASE STUDIES ── */}
-      <section id="work" style={{ padding: "7rem 2.5rem", maxWidth: "1280px", margin: "0 auto" }}>
+      <section id="work" style={{ padding: `7rem ${sectionPad}`, maxWidth: "1280px", margin: "0 auto" }}>
         <Reveal>
           <Eyebrow label="Featured Work" />
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>Case Studies</h2>
           <p style={{ fontSize: "18px", color: T.body, maxWidth: "520px", lineHeight: 1.78, marginBottom: "3.5rem", fontWeight: 400 }}>Selected projects where design directly created measurable business and user impact.</p>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: "1.25rem", alignItems: "stretch" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2,minmax(0,1fr))", gap: CARD_LAYOUT.gap, alignItems: "stretch" }}>
           {CASE_STUDIES.map((cs, i) => (
             <Reveal key={cs.id} delay={i * 0.07} stretch>
-              <CaseCard cs={cs} dark={dark} surface={T.surface} border={T.border} text={T.text} muted={T.body} onClick={() => navigate(`/case-study/${cs.id}`)} />
+              <CaseCard cs={cs} dark={dark} surface={T.surface} border={T.border} text={T.text} muted={T.body} compactTag={isMobile} onClick={() => navigate(`/case-study/${cs.id}`)} />
             </Reveal>
           ))}
         </div>
       </section>
 
       {/* ── DESIGN PRINCIPLES (nav: Process → #process) ── */}
-      <section id="process" style={{ padding: "7rem 2.5rem", maxWidth: "1280px", margin: "0 auto", background: T.bg2, borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
+      <section id="process" style={{ padding: `7rem ${sectionPad}`, maxWidth: "1280px", margin: "0 auto", background: T.bg2, borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
         <Reveal>
           <Eyebrow label="How I Think" />
           <h2 style={{ fontSize: "clamp(2.1rem,4.5vw,3.1rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.1 }}>Design Principles That Guide My Work</h2>
@@ -795,15 +1160,15 @@ export default function Portfolio() {
             Not a process. A point of view — built from 6.8 years of shipping real products across EdTech, logistics, cybersecurity, and enterprise SaaS.
           </p>
         </Reveal>
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.15rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: CARD_LAYOUT.stackGap }}>
           {DESIGN_PRINCIPLES.map((p, i) => (
             <Reveal key={p.n} delay={0.04 + i * 0.05}>
               <div
                 style={{
                   background: T.surface,
                   border: `1px solid ${T.border}`,
-                  borderRadius: "20px",
-                  padding: "1.65rem 1.5rem 1.7rem",
+                  borderRadius: CARD_LAYOUT.radius,
+                  padding: cardPad,
                   boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 4px 24px rgba(0,0,0,0.04)",
                 }}
               >
@@ -817,20 +1182,20 @@ export default function Portfolio() {
       </section>
 
       {/* ── SELECTED WORK (BEYOND CASE STUDIES) — 2×2 grid on large screens ── */}
-      <section style={{ padding: "5rem 2.5rem 7rem", background: T.bg2 }}>
+      <section style={{ padding: `5rem ${sectionPad} 7rem`, background: T.bg2 }}>
         <style>
           {`
           .selected-work-card-grid {
             display: grid;
-            gap: 1.15rem;
+            gap: 1.25rem;
             align-items: stretch;
             width: 100%;
             min-width: 0;
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             grid-auto-rows: auto;
             isolation: isolate;
           }
-          @media (min-width: 900px) {
+          @media (min-width: 768px) {
             .selected-work-card-grid {
               grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -851,7 +1216,7 @@ export default function Portfolio() {
           </Reveal>
           <div className="selected-work-card-grid" style={{ boxSizing: "border-box" }}>
             {SELECTED_WORK.map((item, i) => (
-              <SelectedWorkCard key={item.title} item={item} delay={i * 0.05} dark={dark} T={T} onModalOpen={setWorkModalItem} />
+              <SelectedWorkCard key={item.title} item={item} delay={i * 0.05} dark={dark} T={T} onModalOpen={setWorkModalItem} imageHeight={isMobile ? 240 : SW_IMG_H} cardPadding={cardPad} />
             ))}
           </div>
         </div>
@@ -865,7 +1230,7 @@ export default function Portfolio() {
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>How I Work</h2>
           <p style={{ fontSize: "18px", color: T.body, maxWidth: "520px", lineHeight: 1.78, marginBottom: "3.5rem" }}>Research-driven. Outcome-oriented. Built for velocity without sacrificing craft.</p>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: "1rem" }}>
+        <div className="portfolio-process-steps" style={{ display: "grid", gap: "1rem" }}>
           {PROCESS_STEPS.map((p, i) => {
             const active = activeStep === i;
             return (
@@ -886,7 +1251,7 @@ export default function Portfolio() {
       */}
 
       {/* ── SKILLS ── */}
-      <section id="skills" style={{ padding: "5rem 2.5rem 7rem", background: T.bg2 }}>
+      <section id="skills" style={{ padding: `5rem ${sectionPad} 7rem`, background: T.bg2 }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <Reveal>
             <Eyebrow label="Skills & Tools" />
@@ -895,21 +1260,31 @@ export default function Portfolio() {
               {`6.8 years across EdTech, logistics, cybersecurity, and enterprise SaaS — these are the tools and skills I use daily, and the ones I've shipped real products with.`}
             </p>
           </Reveal>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.15rem" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: CARD_LAYOUT.gap,
+              alignItems: "start",
+            }}
+          >
             {SKILLS_CATEGORIES.map((c, i) => (
-              <Reveal key={c.label} delay={0.04 + i * 0.04}>
+              <Reveal key={c.label} delay={0.04 + i * 0.04} style={{ minWidth: 0, width: "100%" }}>
                 <div
                   style={{
                     background: T.surface,
                     border: `1px solid ${T.border}`,
-                    borderRadius: "18px",
-                    padding: "1.25rem 1.35rem 1.3rem",
-                    height: "100%",
+                    borderRadius: CARD_LAYOUT.radius,
+                    padding: cardPad,
+                    minHeight: 0,
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
                     boxShadow: dark ? "0 8px 28px rgba(0,0,0,0.16)" : "0 2px 16px rgba(0,0,0,0.04)",
                   }}
                 >
-                  <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.1em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.55rem" }}>{c.label}</p>
-                  <p style={{ fontSize: "15px", color: T.textB, margin: 0, lineHeight: 1.72 }}>{c.line}</p>
+                  <p style={{ fontSize: isMobile ? "11px" : "12px", fontWeight: 800, letterSpacing: "0.1em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.5rem" }}>{c.label}</p>
+                  <p style={{ fontSize: isMobile ? "14px" : "15px", color: T.textB, margin: 0, lineHeight: isMobile ? 1.68 : 1.72 }}>{c.line}</p>
                 </div>
               </Reveal>
             ))}
@@ -918,7 +1293,7 @@ export default function Portfolio() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section style={{ padding: "7rem 2.5rem", maxWidth: "1280px", margin: "0 auto" }}>
+      <section style={{ padding: `7rem ${sectionPad}`, maxWidth: "1280px", margin: "0 auto" }}>
         <Reveal>
           <Eyebrow label="Testimonials" />
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>What People Say</h2>
@@ -926,16 +1301,23 @@ export default function Portfolio() {
             Recommendations from managers and teammates — each with a one-click path to verify on LinkedIn.
           </p>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "1.35rem" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(auto-fit,minmax(300px,1fr))",
+            gap: CARD_LAYOUT.gap,
+            alignItems: "start",
+          }}
+        >
           {TESTIMONIALS.map((t, i) => (
-            <TestimonialCard key={t.name} t={t} delay={i * 0.08} dark={dark} T={T} />
+            <TestimonialCard key={t.name} t={t} delay={i * 0.08} dark={dark} T={T} cardPadding={cardPad} />
           ))}
         </div>
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ padding: "5rem 2.5rem 7rem", background: T.bg2 }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gridTemplateColumns: "1.7fr 1fr", gap: "6rem", alignItems: "center" }}>
+      <section id="about" style={{ padding: `5rem ${sectionPad} 7rem`, background: T.bg2 }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "minmax(0, 1.7fr) minmax(0, 1fr)", gap: isMobile ? "2.5rem" : "6rem", alignItems: isMobile ? "start" : "center" }}>
           <Reveal>
             <Eyebrow label="About Me" />
             <h2 style={{ fontSize: "clamp(2rem,4.5vw,3.1rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 1.5rem", lineHeight: 1.1 }}>
@@ -950,7 +1332,7 @@ export default function Portfolio() {
             <p style={{ fontSize: "16px", color: T.body, lineHeight: 1.9, marginBottom: "2.15rem", letterSpacing: "0.01em" }}>
               {`I work best in environments where the problem is genuinely hard — where there's no obvious answer, no clean data, and no competitor to copy. That's where structured thinking and strong design instincts matter most.`}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.95rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))", gap: isMobile ? "1.05rem" : "0.95rem" }}>
               {[
                 "WCAG 2.1 accessibility standard",
                 "Research-driven without perfect data",
@@ -959,15 +1341,15 @@ export default function Portfolio() {
                 "Multi-role UX for enterprise platforms",
                 "Shipped across 6+ industries globally",
               ].map(x => (
-                <div key={x} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ color: "#6366f1", fontWeight: 900, fontSize: "14px", flexShrink: 0 }}>→</span>
-                  <span style={{ fontSize: "15px", color: T.bodyB, fontWeight: 500 }}>{x}</span>
+                <div key={x} style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: "10px", minWidth: 0 }}>
+                  <span style={{ color: "#6366f1", fontWeight: 900, fontSize: "14px", flexShrink: 0, lineHeight: 1.45, ...(isMobile ? { marginTop: "0.2em" } : {}) }}>→</span>
+                  <span style={{ fontSize: "15px", color: T.bodyB, fontWeight: 500, minWidth: 0, lineHeight: 1.55, ...(isMobile ? { overflowWrap: "break-word", wordBreak: "break-word" } : {}) }}>{x}</span>
                 </div>
               ))}
             </div>
           </Reveal>
           <Reveal delay={0.15}>
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: "24px", padding: "2.1rem 2rem", boxShadow: dark ? "0 28px 90px rgba(0,0,0,0.45),0 0 0 1px rgba(99,102,241,0.08)" : "0 24px 80px rgba(0,0,0,0.07),0 0 0 1px rgba(99,102,241,0.06)" }}>
+            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: CARD_LAYOUT.radius, padding: cardPad, boxShadow: dark ? "0 28px 90px rgba(0,0,0,0.45),0 0 0 1px rgba(99,102,241,0.08)" : "0 24px 80px rgba(0,0,0,0.07),0 0 0 1px rgba(99,102,241,0.06)" }}>
               <div style={{ width: "76px", height: "76px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "34px", marginBottom: "1.35rem", boxShadow: "0 10px 32px rgba(99,102,241,0.45)" }}>🎨</div>
               <p style={{ fontWeight: 900, fontSize: "21px", color: T.text, margin: "0 0 4px", letterSpacing: "-0.03em" }}>Himanshu Grover</p>
               <p style={{ fontSize: "14px", color: "#6366f1", fontWeight: 600, margin: "0 0 1.5rem" }}>Senior Product Designer</p>
@@ -983,27 +1365,65 @@ export default function Portfolio() {
       </section>
 
       {/* ── CONTACT ── */}
-      <section id="contact" style={{ padding: "8.5rem 2.5rem", maxWidth: "880px", margin: "0 auto", textAlign: "center", position: "relative" }}>
+      <section id="contact" style={{ padding: `8.5rem ${sectionPad}`, maxWidth: "880px", margin: "0 auto", textAlign: "center", position: "relative" }}>
         <div style={{ position: "absolute", top: "45%", left: "50%", transform: "translate(-50%,-50%)", width: "760px", height: "520px", background: "radial-gradient(ellipse at center,rgba(99,102,241,0.14) 0%,rgba(167,139,250,0.05) 42%,transparent 72%)", pointerEvents: "none", filter: "blur(2px)" }} />
         <Reveal>
           <Eyebrow label="Let's Connect" center />
-          <h2 style={{ fontSize: "clamp(2.6rem,6vw,4.5rem)", fontWeight: 900, letterSpacing: "-0.055em", color: T.text, margin: "0 0 1.2rem", lineHeight: 1.02 }}>
+          <h2 style={{ fontSize: "clamp(2rem,5vw,4.5rem)", fontWeight: 900, letterSpacing: "-0.055em", color: T.text, margin: "0 0 1.2rem", lineHeight: 1.02, overflowWrap: "anywhere" }}>
             Let's build products<br />
             <span style={{ background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>users love.</span>
           </h2>
-          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.85, maxWidth: "520px", margin: "0 auto 2.9rem", fontWeight: 400, letterSpacing: "0.01em" }}>
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.85, maxWidth: "520px", margin: "0 auto 2.9rem", fontWeight: 400, letterSpacing: "0.01em", ...(isMobile ? { padding: "0 4px", boxSizing: "border-box" } : {}) }}>
             Open to senior product design, UI/UX, and fully remote roles worldwide.
           </p>
-          <div style={{ display: "flex", gap: "0.85rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2.1rem" }}>
-            <Btn variant="primary" href="mailto:himanshugrover2710@gmail.com" dark={dark}>himanshugrover2710@gmail.com →</Btn>
-            <Btn variant="ghost" dark={dark}>View LinkedIn</Btn>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.85rem",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              marginBottom: "2.1rem",
+              ...(isMobile ? { flexDirection: "column", alignItems: "stretch", width: "100%", maxWidth: "100%", boxSizing: "border-box", padding: "0 2px" } : {}),
+            }}
+          >
+            <Btn
+              variant="primary"
+              href="mailto:himanshugrover2710@gmail.com"
+              dark={dark}
+              style={
+                isMobile
+                  ? {
+                      width: "100%",
+                      maxWidth: "100%",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      padding: "16px 18px",
+                      fontSize: "clamp(12.5px, 3.4vw, 15px)",
+                      lineHeight: 1.35,
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                      boxSizing: "border-box",
+                    }
+                  : undefined
+              }
+            >
+              himanshugrover2710@gmail.com{isMobile ? "\u00a0" : " "}→
+            </Btn>
+            <Btn
+              variant="ghost"
+              dark={dark}
+              style={isMobile ? { width: "100%", maxWidth: "100%", justifyContent: "center", boxSizing: "border-box", padding: "14px 18px" } : undefined}
+            >
+              View LinkedIn
+            </Btn>
           </div>
-          <p style={{ color: T.body, fontSize: "15px", fontWeight: 500, margin: 0 }}>📞 +91 97116 92602</p>
+          <p style={{ color: T.body, fontSize: "15px", fontWeight: 500, margin: 0, ...(isMobile ? { lineHeight: 1.5, padding: "0 4px" } : {}) }}>📞 +91 97116 92602</p>
         </Reveal>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: `1px solid ${T.border}`, padding: "1.75rem 2.5rem", background: T.bg2, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+      <footer style={{ borderTop: `1px solid ${T.border}`, padding: `1.75rem ${sectionPad}`, background: T.bg2, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
         <span style={{ fontWeight: 900, fontSize: "17px", letterSpacing: "-0.05em", color: T.text }}><span style={{ color: "#6366f1" }}>H</span>G.</span>
         <span style={{ color: T.body, fontSize: "13px" }}>© 2026 Himanshu Grover — Designed with intention.</span>
         <div style={{ display: "flex", gap: "1.25rem" }}>
