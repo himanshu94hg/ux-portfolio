@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { CASE_STUDIES } from "./src/data/caseStudiesData.js";
+import { readStoredThemeIsDark, persistThemePreference } from "./src/themeStorage.js";
 
 /* ─── DATA ────────────────────────────────────────────────── */
 
@@ -50,6 +51,8 @@ const SKILLS_CATEGORIES = [
 
 const LINKEDIN_RECOMMENDATIONS_URL =
   "https://www.linkedin.com/in/himanshugrover-hg/details/recommendations/?detailScreenTabIndex=0";
+/** Brand spelling: capital I and N (https://brand.linkedin.com). */
+const LINKEDIN = "LinkedIn";
 
 const TESTIMONIALS = [
   {
@@ -322,10 +325,18 @@ function Eyebrow({ label, center }) {
   );
 }
 
-function TestimonialCard({ t, delay, dark, T, cardPadding }) {
+function TestimonialCard({ t, delay, dark, T, cardPadding, isMobile }) {
   const [hov, setHov] = useState(false);
+  const fillRow = !isMobile;
   return (
-    <Reveal delay={delay} style={{ minWidth: 0, width: "100%" }}>
+    <Reveal
+      delay={delay}
+      style={{
+        minWidth: 0,
+        width: "100%",
+        ...(fillRow ? { height: "100%", display: "flex", flexDirection: "column" } : {}),
+      }}
+    >
       <div
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
@@ -343,6 +354,7 @@ function TestimonialCard({ t, delay, dark, T, cardPadding }) {
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
+          ...(fillRow ? { flex: 1, height: "100%" } : {}),
         }}
       >
         <div style={{ fontSize: "52px", lineHeight: 0.75, background: `linear-gradient(160deg,${t.color}aa,${t.color}22)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "Georgia,serif", marginBottom: "0.5rem", fontWeight: 700, userSelect: "none" }}>"</div>
@@ -372,7 +384,7 @@ function TestimonialCard({ t, delay, dark, T, cardPadding }) {
               transition: "border-color 0.2s",
             }}
           >
-            Verify on LinkedIn →
+            {`Verify on ${LINKEDIN} →`}
           </a>
         </div>
       </div>
@@ -810,7 +822,7 @@ function CaseCard({ cs, dark, surface, border, text, muted, onClick, compactTag 
 /* ─── MAIN ────────────────────────────────────────────────── */
 export default function Portfolio() {
   const navigate = useNavigate();
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(() => readStoredThemeIsDark());
   const [shrink, setShrink] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [workModalItem, setWorkModalItem] = useState(null);
@@ -930,7 +942,17 @@ export default function Portfolio() {
               {navOpen ? "×" : "☰"}
             </button>
           )}
-          <button onClick={() => setDark(!dark)} style={{ marginLeft: isMobile ? "4px" : "8px", background: T.subtle, border: `1px solid ${T.border}`, color: T.body, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+          <button
+            type="button"
+            onClick={() => {
+              setDark(prev => {
+                const next = !prev;
+                persistThemePreference(next);
+                return next;
+              });
+            }}
+            style={{ marginLeft: isMobile ? "4px" : "8px", background: T.subtle, border: `1px solid ${T.border}`, color: T.body, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
+          >
             {dark ? "○" : "●"}
           </button>
         </div>
@@ -1064,7 +1086,7 @@ export default function Portfolio() {
           <p style={{ fontSize: "clamp(1.1rem,2.2vw,1.35rem)", fontWeight: 800, color: T.bodyB, letterSpacing: "-0.028em", margin: "0 0 1.15rem", lineHeight: 1.4 }}>
             Senior Product Designer · UI/UX · AI Products
           </p>
-          <p style={{ fontSize: "clamp(1.05rem,1.8vw,1.15rem)", lineHeight: 1.92, color: T.body, maxWidth: "540px", margin: "0 0 2.85rem", fontWeight: 400, letterSpacing: "0.01em" }}>
+          <p style={{ fontSize: "clamp(1.05rem,1.8vw,1.15rem)", lineHeight: 1.92, color: T.body, margin: "0 0 2.85rem", fontWeight: 400, letterSpacing: "0.01em" }}>
             I design products people love and businesses grow with. 6.8+ years building SaaS tools, enterprise platforms, marketplaces, and AI-powered experiences — always with measurable outcomes.
           </p>
 
@@ -1140,7 +1162,7 @@ export default function Portfolio() {
         <Reveal>
           <Eyebrow label="Featured Work" />
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>Case Studies</h2>
-          <p style={{ fontSize: "18px", color: T.body, maxWidth: "520px", lineHeight: 1.78, marginBottom: "3.5rem", fontWeight: 400 }}>Selected projects where design directly created measurable business and user impact.</p>
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, marginBottom: "3.5rem", fontWeight: 400 }}>Selected projects where design directly created measurable business and user impact.</p>
         </Reveal>
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2,minmax(0,1fr))", gap: CARD_LAYOUT.gap, alignItems: "stretch" }}>
           {CASE_STUDIES.map((cs, i) => (
@@ -1156,7 +1178,7 @@ export default function Portfolio() {
         <Reveal>
           <Eyebrow label="How I Think" />
           <h2 style={{ fontSize: "clamp(2.1rem,4.5vw,3.1rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.1 }}>Design Principles That Guide My Work</h2>
-          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, margin: "0 0 2.75rem", fontWeight: 400, maxWidth: "640px" }}>
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, margin: "0 0 2.75rem", fontWeight: 400 }}>
             Not a process. A point of view — built from 6.8 years of shipping real products across EdTech, logistics, cybersecurity, and enterprise SaaS.
           </p>
         </Reveal>
@@ -1210,7 +1232,7 @@ export default function Portfolio() {
           <Reveal>
             <Eyebrow label="Selected Work" />
             <h2 style={{ fontSize: "clamp(2.2rem,5vw,3.2rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.9rem", lineHeight: 1.08 }}>Beyond Case Studies</h2>
-            <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, maxWidth: "640px", margin: "0 0 2.75rem" }}>
+            <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, margin: "0 0 2.75rem" }}>
               {`Live products, real clients, and design exercises — spanning eCommerce, logistics SaaS, mobile, and consumer platforms.`}
             </p>
           </Reveal>
@@ -1256,7 +1278,7 @@ export default function Portfolio() {
           <Reveal>
             <Eyebrow label="Skills & Tools" />
             <h2 style={{ fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.1 }}>What I Work With</h2>
-            <p style={{ fontSize: "17px", color: T.body, lineHeight: 1.82, margin: "0 0 2.5rem", fontWeight: 400, maxWidth: "720px" }}>
+            <p style={{ fontSize: "17px", color: T.body, lineHeight: 1.82, margin: "0 0 2.5rem", fontWeight: 400 }}>
               {`6.8 years across EdTech, logistics, cybersecurity, and enterprise SaaS — these are the tools and skills I use daily, and the ones I've shipped real products with.`}
             </p>
           </Reveal>
@@ -1265,11 +1287,19 @@ export default function Portfolio() {
               display: "grid",
               gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(auto-fit, minmax(300px, 1fr))",
               gap: CARD_LAYOUT.gap,
-              alignItems: "start",
+              alignItems: isMobile ? "start" : "stretch",
             }}
           >
             {SKILLS_CATEGORIES.map((c, i) => (
-              <Reveal key={c.label} delay={0.04 + i * 0.04} style={{ minWidth: 0, width: "100%" }}>
+              <Reveal
+                key={c.label}
+                delay={0.04 + i * 0.04}
+                style={{
+                  minWidth: 0,
+                  width: "100%",
+                  ...(!isMobile ? { height: "100%", display: "flex", flexDirection: "column" } : {}),
+                }}
+              >
                 <div
                   style={{
                     background: T.surface,
@@ -1281,10 +1311,11 @@ export default function Portfolio() {
                     maxWidth: "100%",
                     boxSizing: "border-box",
                     boxShadow: dark ? "0 8px 28px rgba(0,0,0,0.16)" : "0 2px 16px rgba(0,0,0,0.04)",
+                    ...(!isMobile ? { flex: 1, height: "100%", display: "flex", flexDirection: "column" } : {}),
                   }}
                 >
-                  <p style={{ fontSize: isMobile ? "11px" : "12px", fontWeight: 800, letterSpacing: "0.1em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.5rem" }}>{c.label}</p>
-                  <p style={{ fontSize: isMobile ? "14px" : "15px", color: T.textB, margin: 0, lineHeight: isMobile ? 1.68 : 1.72 }}>{c.line}</p>
+                  <p style={{ fontSize: isMobile ? "11px" : "12px", fontWeight: 800, letterSpacing: "0.1em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 0.5rem", flexShrink: 0 }}>{c.label}</p>
+                  <p style={{ fontSize: isMobile ? "14px" : "15px", color: T.textB, margin: 0, lineHeight: isMobile ? 1.68 : 1.72, ...(!isMobile ? { flex: 1, minHeight: 0 } : {}) }}>{c.line}</p>
                 </div>
               </Reveal>
             ))}
@@ -1297,8 +1328,8 @@ export default function Portfolio() {
         <Reveal>
           <Eyebrow label="Testimonials" />
           <h2 style={{ fontSize: "clamp(2.4rem,5vw,3.5rem)", fontWeight: 900, letterSpacing: "-0.045em", color: T.text, margin: "0 0 0.8rem", lineHeight: 1.08 }}>What People Say</h2>
-          <p style={{ fontSize: "18px", color: T.body, maxWidth: "560px", lineHeight: 1.78, marginBottom: "3.5rem" }}>
-            Recommendations from managers and teammates — each with a one-click path to verify on LinkedIn.
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.78, marginBottom: "3.5rem" }}>
+            {`Recommendations from managers and teammates — each with a one-click path to verify on ${LINKEDIN}.`}
           </p>
         </Reveal>
         <div
@@ -1306,11 +1337,11 @@ export default function Portfolio() {
             display: "grid",
             gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(auto-fit,minmax(300px,1fr))",
             gap: CARD_LAYOUT.gap,
-            alignItems: "start",
+            alignItems: isMobile ? "start" : "stretch",
           }}
         >
           {TESTIMONIALS.map((t, i) => (
-            <TestimonialCard key={t.name} t={t} delay={i * 0.08} dark={dark} T={T} cardPadding={cardPad} />
+            <TestimonialCard key={t.name} t={t} delay={i * 0.08} dark={dark} T={T} cardPadding={cardPad} isMobile={isMobile} />
           ))}
         </div>
       </section>
@@ -1373,7 +1404,7 @@ export default function Portfolio() {
             Let's build products<br />
             <span style={{ background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>users love.</span>
           </h2>
-          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.85, maxWidth: "520px", margin: "0 auto 2.9rem", fontWeight: 400, letterSpacing: "0.01em", ...(isMobile ? { padding: "0 4px", boxSizing: "border-box" } : {}) }}>
+          <p style={{ fontSize: "18px", color: T.body, lineHeight: 1.85, margin: "0 auto 2.9rem", fontWeight: 400, letterSpacing: "0.01em", ...(isMobile ? { padding: "0 4px", boxSizing: "border-box" } : {}) }}>
             Open to senior product design, UI/UX, and fully remote roles worldwide.
           </p>
           <div
@@ -1415,7 +1446,7 @@ export default function Portfolio() {
               dark={dark}
               style={isMobile ? { width: "100%", maxWidth: "100%", justifyContent: "center", boxSizing: "border-box", padding: "14px 18px" } : undefined}
             >
-              View LinkedIn
+              {`View ${LINKEDIN}`}
             </Btn>
           </div>
           <p style={{ color: T.body, fontSize: "15px", fontWeight: 500, margin: 0, ...(isMobile ? { lineHeight: 1.5, padding: "0 4px" } : {}) }}>📞 +91 97116 92602</p>
