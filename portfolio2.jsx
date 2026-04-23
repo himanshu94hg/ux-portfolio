@@ -879,30 +879,68 @@ function SkillsCategoryCard({ c, dark, T, cardPad, isMobile }) {
   );
 }
 
-function DesignPrincipleCard({ p, dark, T, cardPad }) {
+function DesignPrincipleCard({ p, dark, T, isMobile }) {
   const [hov, setHov] = useState(false);
+  const accentTopSolid = hov ? "#818cf8" : "#6366f1";
   const baseShadow = dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 4px 24px rgba(0,0,0,0.04)";
   const hoverShadow = dark
-    ? `0 24px 56px rgba(0,0,0,0.45), 0 0 0 1px ${SKILLS_CARD_ACCENT}30, 0 0 40px ${SKILLS_CARD_ACCENT}14`
-    : `0 20px 44px rgba(15,23,42,0.1), 0 10px 28px rgba(99,102,241,0.12), 0 0 0 1px ${SKILLS_CARD_ACCENT}22`;
+    ? `0 14px 40px rgba(0,0,0,0.35), 0 0 0 1px ${SKILLS_CARD_ACCENT}28`
+    : `0 14px 36px rgba(99,102,241,0.12), 0 6px 20px rgba(0,0,0,0.06)`;
+  const pad = isMobile ? "clamp(1.5rem, 5vw, 2.5rem)" : "2.5rem";
+  const bodyColor = T.bodyB;
   return (
     <div
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
+        position: "relative",
+        overflow: "hidden",
         background: hov && !dark ? "#fafbff" : T.surface,
-        border: `1px solid ${hov ? `${SKILLS_CARD_ACCENT}40` : T.border}`,
+        border: `1px solid ${hov ? `${SKILLS_CARD_ACCENT}45` : T.border}`,
+        borderTop: `3px solid ${accentTopSolid}`,
         borderRadius: CARD_LAYOUT.radius,
-        padding: cardPad,
+        padding: pad,
         boxSizing: "border-box",
         boxShadow: hov ? hoverShadow : baseShadow,
-        transition: "transform 0.38s cubic-bezier(.22,1,.36,1), box-shadow 0.38s cubic-bezier(.22,1,.36,1), border-color 0.32s ease, background 0.32s ease",
-        transform: hov ? "translateY(-7px)" : "none",
+        transition: "transform 0.32s cubic-bezier(.22,1,.36,1), box-shadow 0.32s cubic-bezier(.22,1,.36,1), border-color 0.28s ease, border-top-color 0.28s ease, background 0.28s ease",
+        transform: hov ? "translateY(-4px)" : "none",
       }}
     >
-      <p style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.12em", color: SKILLS_CARD_ACCENT, textTransform: "uppercase", margin: "0 0 0.5rem" }}>Principle {p.n}</p>
-      <p style={{ fontSize: "1.1rem", fontWeight: 800, color: T.text, margin: "0 0 0.75rem", letterSpacing: "-0.02em", lineHeight: 1.35 }}>{p.title}</p>
-      <p style={{ fontSize: "16px", color: T.body, margin: 0, lineHeight: 1.78 }}>{p.body}</p>
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: isMobile ? "-0.05em" : "0.02em",
+          right: isMobile ? "-0.12em" : "0.08em",
+          fontSize: isMobile ? "clamp(72px, 22vw, 120px)" : "120px",
+          fontWeight: 900,
+          lineHeight: 0.85,
+          letterSpacing: "-0.06em",
+          color: SKILLS_CARD_ACCENT,
+          opacity: dark ? 0.08 : 0.06,
+          userSelect: "none",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        {p.n}
+      </span>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <p
+          style={{
+            fontSize: "13px",
+            fontWeight: 900,
+            letterSpacing: "0.18em",
+            color: SKILLS_CARD_ACCENT,
+            textTransform: "uppercase",
+            margin: "0 0 1rem",
+          }}
+        >
+          Principle {p.n}
+        </p>
+        <p style={{ fontSize: "20px", fontWeight: 800, color: T.text, margin: "0 0 1rem", letterSpacing: "-0.022em", lineHeight: 1.3 }}>{p.title}</p>
+        <p style={{ fontSize: "15px", color: bodyColor, margin: 0, lineHeight: 1.8, fontWeight: 400 }}>{p.body}</p>
+      </div>
     </div>
   );
 }
@@ -1283,10 +1321,25 @@ export default function Portfolio() {
             Not a process. A point of view — built from 6.8 years of shipping real products across EdTech, logistics, cybersecurity, and enterprise SaaS.
           </p>
         </Reveal>
-        <div style={{ display: "flex", flexDirection: "column", gap: CARD_LAYOUT.stackGap }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
+            gap: "1.5rem",
+            alignItems: "stretch",
+          }}
+        >
           {DESIGN_PRINCIPLES.map((p, i) => (
-            <Reveal key={p.n} delay={0.04 + i * 0.05}>
-              <DesignPrincipleCard p={p} dark={dark} T={T} cardPad={cardPad} />
+            <Reveal
+              key={p.n}
+              delay={0.04 + i * 0.05}
+              style={{
+                minWidth: 0,
+                width: "100%",
+                ...(!isMobile && i === 0 ? { gridColumn: "1 / -1" } : {}),
+              }}
+            >
+              <DesignPrincipleCard p={p} dark={dark} T={T} isMobile={isMobile} />
             </Reveal>
           ))}
         </div>
