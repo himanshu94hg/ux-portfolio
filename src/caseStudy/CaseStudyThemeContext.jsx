@@ -88,7 +88,8 @@ export function CaseStudyPageChrome({ children, backLabel = "Back to portfolio" 
               height: "40px",
               borderRadius: "50%",
               cursor: "pointer",
-              fontSize: "14px",
+              fontSize: "17px",
+              lineHeight: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -96,7 +97,7 @@ export function CaseStudyPageChrome({ children, backLabel = "Back to portfolio" 
               flexShrink: 0,
             }}
           >
-            {dark ? "○" : "●"}
+            {dark ? "🌙" : "☀"}
           </button>
         </div>
         {children}

@@ -1080,9 +1080,10 @@ export default function Portfolio() {
                 return next;
               });
             }}
-            style={{ marginLeft: isMobile ? "4px" : "8px", background: T.subtle, border: `1px solid ${T.border}`, color: T.body, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+            style={{ marginLeft: isMobile ? "4px" : "8px", background: T.subtle, border: `1px solid ${T.border}`, color: T.body, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "16px", lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
           >
-            {dark ? "○" : "●"}
+            {dark ? "🌙" : "☀"}
           </button>
         </div>
       </nav>

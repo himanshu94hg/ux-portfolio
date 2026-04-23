@@ -244,8 +244,8 @@ export default function Portfolio() {
               {l}
             </button>
           ))}
-          <button onClick={() => setDark(!dark)} style={{ background: subtle, border: `1px solid ${surfaceBorder}`, color: text, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "15px", marginLeft: "0.5rem", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-            {dark ? "☀" : "☾"}
+          <button type="button" onClick={() => setDark(!dark)} aria-label={dark ? "Switch to light mode" : "Switch to dark mode"} style={{ background: subtle, border: `1px solid ${surfaceBorder}`, color: text, width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer", fontSize: "16px", lineHeight: 1, marginLeft: "0.5rem", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+            {dark ? "🌙" : "☀"}
           </button>
         </div>
       </nav>
