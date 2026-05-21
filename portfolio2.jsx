@@ -1222,7 +1222,7 @@ export default function Portfolio() {
 
           <div style={{ display: "flex", gap: isMobile ? "0.65rem" : "0.8rem", flexWrap: "wrap", alignItems: "center" }}>
             <Btn variant="primary" onClick={() => scrollTo("work")} dark={dark} style={isMobile ? { padding: "15px 22px", fontSize: "16px" } : undefined}>View Case Studies →</Btn>
-            <Btn variant="ghost" href="/Himanshu_Grover_Resume_PD.pdf" target="_blank" dark={dark} style={isMobile ? { padding: "14px 20px", fontSize: "16px" } : undefined}>Download Resume</Btn>
+            <Btn variant="ghost" href="/UXD_Himanshu_Grover_Resume.pdf" target="_blank" dark={dark} style={isMobile ? { padding: "14px 20px", fontSize: "16px" } : undefined}>Download Resume</Btn>
             <Btn variant="ghost" href="mailto:himanshugrover2710@gmail.com" dark={dark} style={isMobile ? { padding: "14px 20px", fontSize: "16px" } : undefined}>Let's Talk</Btn>
           </div>
         </div>
