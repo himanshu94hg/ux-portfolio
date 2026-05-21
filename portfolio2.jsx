@@ -716,10 +716,10 @@ function HeroCard({ dark, fullWidth }) {
       <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: fullWidth ? "min(380px, 100vw)" : "380px", height: fullWidth ? "min(380px, 100vw)" : "380px", background: "radial-gradient(circle,rgba(99,102,241,0.24) 0%,rgba(99,102,241,0.06) 45%,transparent 70%)", pointerEvents: "none", opacity: float ? 1 : 0.85, transition: "opacity 0.45s cubic-bezier(.22,1,.36,1)" }} />
       <div style={{ position: "relative", background: T ? "rgba(13,16,28,0.92)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)", border: `1px solid ${T ? "rgba(255,255,255,0.1)" : "rgba(99,102,241,0.2)"}`, borderRadius: "28px", padding: fullWidth ? CARD_LAYOUT.padMob : CARD_LAYOUT.padDesk, boxShadow: float ? (T ? "0 44px 100px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(255,255,255,0.06)" : "0 44px 100px rgba(0,0,0,0.14), 0 0 40px rgba(99,102,241,0.1)") : (T ? "0 36px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)" : "0 36px 90px rgba(0,0,0,0.12)"), transform: float ? "translateY(-6px)" : "none", transition: "transform 0.45s cubic-bezier(.22,1,.36,1), box-shadow 0.45s cubic-bezier(.22,1,.36,1)" }}>
         <div style={{ width: fullWidth ? "60px" : "68px", height: fullWidth ? "60px" : "68px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: fullWidth ? "26px" : "30px", marginBottom: "1.25rem", boxShadow: "0 8px 28px rgba(99,102,241,0.45)" }}>🎨</div>
-        <p style={{ fontSize: fullWidth ? "12px" : "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 5px" }}>Senior Product Designer</p>
+        <p style={{ fontSize: fullWidth ? "12px" : "11px", fontWeight: 700, letterSpacing: "0.12em", color: "#6366f1", textTransform: "uppercase", margin: "0 0 5px" }}>Senior Product/ UI/UX Designer</p>
         <p style={{ fontSize: fullWidth ? "clamp(1.15rem,4.5vw,1.375rem)" : "22px", fontWeight: 900, color: T ? "#f1f5f9" : "#0f172a", letterSpacing: "-0.035em", margin: "0 0 1.25rem", lineHeight: 1.15 }}>Himanshu Grover</p>
         <div style={{ height: "1px", background: T ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)", margin: "0 0 1rem" }} />
-        {[["6.8+ yrs", "Product Design"], ["30+ Products & Features Shipped to Production"], ["Thousands of users impacted globally"]].map(([v, l]) => (
+        {[["6.8+ yrs", "Product/ UI/UX Design"], ["30+ Products & Features Shipped to Production"], ["Thousands of users impacted globally"]].map(([v, l]) => (
           <div key={v} style={{ display: "flex", justifyContent: l ? "space-between" : "flex-start", alignItems: fullWidth ? "flex-start" : "center", flexWrap: "wrap", gap: fullWidth ? "6px" : "4px", padding: "8px 0", borderBottom: `1px solid ${T ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` }}>
             <span style={{ fontSize: fullWidth ? "13px" : "14px", fontWeight: 700, color: T ? "#e2e8f0" : "#1e293b", letterSpacing: "-0.01em", lineHeight: 1.35 }}>{v}</span>
             {l ? <span style={{ fontSize: "12px", color: T ? "#64748b" : "#94a3b8", textAlign: fullWidth ? "left" : "right" }}>{l}</span> : null}
@@ -1214,7 +1214,7 @@ export default function Portfolio() {
           <h1 style={{ fontSize: "clamp(2.4rem,6vw,6.5rem)", fontWeight: 900, lineHeight: 0.98, letterSpacing: "-0.055em", margin: "0 0 1.65rem", background: "linear-gradient(135deg,#6366f1 0%,#a78bfa 50%,#60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", overflowWrap: "anywhere", wordBreak: "break-word" }}>Grover.</h1>
 
           <p style={{ fontSize: "clamp(1.1rem,2.2vw,1.35rem)", fontWeight: 800, color: T.bodyB, letterSpacing: "-0.028em", margin: "0 0 1.15rem", lineHeight: 1.4 }}>
-            Senior Product Designer · UI/UX · AI Products
+            Senior Product Designer · UI/UX Designer· AI Products
           </p>
           <p style={{ fontSize: "clamp(1.05rem,1.8vw,1.15rem)", lineHeight: 1.92, color: T.body, margin: "0 0 2.85rem", fontWeight: 400, letterSpacing: "0.01em" }}>
             I design products people love and businesses grow with. 6.8+ years building SaaS tools, enterprise platforms, marketplaces, and AI-powered experiences — always with measurable outcomes.
@@ -1474,7 +1474,7 @@ export default function Portfolio() {
               I turn complex, ambiguous product problems into clear, structured experiences.
             </h2>
             <p style={{ fontSize: "17px", color: T.bodyB, lineHeight: 1.9, marginBottom: "1.2rem", fontWeight: 400, letterSpacing: "0.01em" }}>
-              {`I'm a Senior Product Designer with 6.8 years across EdTech, logistics, cybersecurity, and enterprise SaaS. I've designed ebook platforms for global publishers like Pearson and HMH, rebuilt fraud intelligence dashboards for enterprise security teams, and shipped aggregator tools used by thousands of logistics operators daily.`}
+              {`I'm a Senior Product/ UI/UX Designer with 6.8 years across EdTech, logistics, cybersecurity, and enterprise SaaS. I've designed ebook platforms for global publishers like Pearson and HMH, rebuilt fraud intelligence dashboards for enterprise security teams, and shipped aggregator tools used by thousands of logistics operators daily.`}
             </p>
             <p style={{ fontSize: "16px", color: T.body, lineHeight: 1.9, marginBottom: "1.2rem", letterSpacing: "0.01em" }}>
               {`What makes me different is where I sit. I understand engineering constraints well enough to have implemented my own designs in React and HTML/CSS. I understand accessibility deeply enough to have designed to WCAG 2.1 standards for 3.5 years without shortcuts. And I understand business well enough to frame every design decision around outcomes, not opinions.`}
@@ -1502,7 +1502,7 @@ export default function Portfolio() {
             <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: CARD_LAYOUT.radius, padding: cardPad, boxShadow: dark ? "0 28px 90px rgba(0,0,0,0.45),0 0 0 1px rgba(99,102,241,0.08)" : "0 24px 80px rgba(0,0,0,0.07),0 0 0 1px rgba(99,102,241,0.06)" }}>
               <div style={{ width: "76px", height: "76px", borderRadius: "50%", background: "linear-gradient(135deg,#6366f1,#a78bfa)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "34px", marginBottom: "1.35rem", boxShadow: "0 10px 32px rgba(99,102,241,0.45)" }}>🎨</div>
               <p style={{ fontWeight: 900, fontSize: "21px", color: T.text, margin: "0 0 4px", letterSpacing: "-0.03em" }}>Himanshu Grover</p>
-              <p style={{ fontSize: "14px", color: "#6366f1", fontWeight: 600, margin: "0 0 1.5rem" }}>Senior Product Designer</p>
+              <p style={{ fontSize: "14px", color: "#6366f1", fontWeight: 600, margin: "0 0 1.5rem" }}>Senior Product/ UI/UX Designer</p>
               {[["Location", "Delhi, India · Remote OK"], ["Availability", "Open to opportunities"], ["Focus", "EdTech · Logistics · Cybersecurity · Enterprise SaaS"]].map(([k, v]) => (
                 <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${T.border}` }}>
                   <span style={{ fontSize: "13px", color: T.body, fontWeight: 500 }}>{k}</span>

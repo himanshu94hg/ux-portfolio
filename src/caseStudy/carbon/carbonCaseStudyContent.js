@@ -5,7 +5,7 @@ export const ACCENT_DIM = "#818cf8";
 export const hero = {
   title: "Carbon Footprint Management Platform",
   lede: "Designing a sustainability intelligence platform that helps enterprises centralize emissions data, track reduction initiatives, and simplify sustainability reporting.",
-  role: "Senior Product Designer",
+  role: "Senior Product/ UI/UX Designer",
   timeline: "6 Weeks",
   scope: "Research · Product Strategy · UX/UI Design · Prototyping",
   /** Fallback if `screenImage` is removed. */

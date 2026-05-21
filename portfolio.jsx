@@ -260,7 +260,7 @@ export default function Portfolio() {
           <h1 style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.04em", margin: "0 0 0.5rem", color: text }}>
             Himanshu<br /><span style={{ background: "linear-gradient(135deg, #6366f1 0%, #a78bfa 50%, #60a5fa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Grover</span>
           </h1>
-          <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.35rem)", fontWeight: 600, color: muted, letterSpacing: "-0.01em", margin: "0 0 1.25rem" }}>Senior Product Designer · UI/UX · AI Products</p>
+          <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.35rem)", fontWeight: 600, color: muted, letterSpacing: "-0.01em", margin: "0 0 1.25rem" }}>Senior Product Designer · UI/UX Designer · AI Products</p>
           <p style={{ fontSize: "clamp(1.05rem, 2vw, 1.2rem)", lineHeight: 1.7, color: dark ? "#cbd5e1" : "#374151", maxWidth: "520px", margin: "0 0 2.5rem" }}>
             Designing products people love and businesses grow. 6.8+ years building SaaS, enterprise tools, dashboards, marketplaces, and AI-powered experiences.
           </p>
@@ -411,7 +411,7 @@ export default function Portfolio() {
             <SectionLabel label="About Me" muted={muted} />
             <h2 style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 1.25rem", color: text }}>I solve complex product problems through design.</h2>
             <p style={{ color: dark ? "#cbd5e1" : "#374151", lineHeight: 1.8, marginBottom: "1rem", fontSize: "16px" }}>
-              I'm a Senior Product Designer who operates at the intersection of user psychology, business strategy, and engineering reality. I've spent 6.8+ years working on products used by millions—from zero-to-one startup launches to enterprise systems serving global teams.
+              I'm a Senior Product/ UI/UX Designer who operates at the intersection of user psychology, business strategy, and engineering reality. I've spent 6.8+ years working on products used by millions—from zero-to-one startup launches to enterprise systems serving global teams.
             </p>
             <p style={{ color: muted, lineHeight: 1.8, marginBottom: "1.75rem", fontSize: "15px" }}>
               My design process is grounded in research, driven by clarity, and measured by outcomes. I don't just make things beautiful—I make them work. Every pixel has a purpose. Every interaction earns its place.
@@ -564,7 +564,7 @@ function AvatarArt({ dark }) {
         </div>
         <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem", right: "1.5rem", background: dark ? "rgba(15,17,23,0.8)" : "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)", borderRadius: "14px", padding: "1rem", border: `1px solid ${dark ? "#2e3458" : "#c7d2fe"}` }}>
           <p style={{ fontWeight: 800, fontSize: "15px", color: dark ? "#f1f5f9" : "#0f172a", margin: "0 0 2px" }}>Himanshu Grover</p>
-          <p style={{ fontSize: "13px", color: "#6366f1", margin: 0, fontWeight: 500 }}>Senior Product Designer</p>
+          <p style={{ fontSize: "13px", color: "#6366f1", margin: 0, fontWeight: 500 }}>Senior Product/ UI/UX Designer</p>
         </div>
       </div>
     </div>
